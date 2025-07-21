@@ -1,0 +1,1849 @@
+# ============================ PROGRESO DEL CODIGO =================================
+
+
+
+"""
+✅YA CIERRA CON CTRL + C, SE LE APLICO AJUSTE AUTOMATICO DE LOS HIPERAMETROS Y EPOCAS TMABIEN SE LE MEJORO.
+Escalado corregido: Ahora scaler solo se ajusta una vez y se reutiliza.
+
+✅ Regularización añadida: Dropout en las capas LSTM para reducir sobreajuste.
+
+✅ Cambio de función de pérdida: Huber Loss para mayor estabilidad.
+
+✅ Métrica mejorada: Se usa R² en lugar de una métrica arbitraria.
+
+✅ CAMBIE EL ENFOQUE DE PREDICCION POR UNO QUE PREDICE SI EL MERCADO EN 5 SEGUNDOS SUBE O BAJA, PARECE QUE FUNCIONA, ARREGLARE UN POCO EL CODIGO.
+
+✅ YA LA IA SE ENTRENA Y PREDICE DESPUES DE ENTRENAR LAS PREDCCIONES LAS HACE BIEN PERO AUN LE FALTAN, Y SOLO DA SEÑALES DE COMPRA TOCA CONSTATAR SI TAMBIEN DA SEÑALES DE VENTA.
+
+✅ YA CORREGI LOS MENSAJES DE VERIFICACION DE LA PREDICCION, TOCA REGTIFICAR EN PROXIMAS ACTUALIZACIONES  SI LAS PREDICCIONES SON CORRECTAS MEDIANTE EL PRECIO INCIAL Y FINAL. 
+
+✅ YA CORREGI LA SALIDA DEL PRECIO DESPUES DE LOS 5 SEGUUNDOS, EL ERROR QUE HAY AHORA ES QUE LOS PRECIOS DE INCIO Y FINAL SON LOS MISMOS Y NO VARIAN.
+
+✅ EN LA FUNCION DE PREDICCION Y EN LA DE EVALUAR LE AÑADI LA LOGICA INTERNA DE OBTENER EL PRECIO DIRECTAMENTE DE MT5 , ES DECIR LA OBTENCIO DEL PRECIO DE MT5 NO ES EXTERNA SE HACE DENTRO DE LA FUNCION.
+
+✅ LE AGREGUE UNA MEJRO VERIFICACION A EVALUAR LA PREDICCION.
+
+✅ MEJORE LA LEJIVILIDAD DEL PRECIO DA EL PRECIO ANTES Y DESPUES CORRECTAMENTE PERO LA EVALUCION LA HACE MAL.
+
+✅ YA EVALUA CORRECTAMENTE LAS OPERACIONES, EL ERROR AHORA ES QUE GURARDA LAS PREDICCIONES EN EL ACRICHO TXT INCORRECTO.
+
+✅ YA LOS ARCHIVOS SE GUARDAN CORRECTAMENTE Y LOS BLOQUES ESTAN BIEN SEPARADOS.
+
+✅ OPERA EN PARALELO MULTIPLES SIMBOLOS, YA VERIFIQUE, PERO AUN NO HACE LAS PREDICCIONES TODAS AL MISMO TIEMPO, LE AGREGUE DIFERENCIACION DE CENTAVOS, DOLAR Y DOLARES CON LA DIFRENCIA.
+
+✅ YA PREDICE TODO, YA SALE TODO EN ORDEN Y CON TODOS LOS SIMBOLOS PERO NECECITO QUE SEAN LOS MISMOS MENSAJES, TOCA CAMBIAR ALGUNAS COSAS.
+
+✅ EL MODELO LE DA LA MISMA IMPORTANCIA A TODOS LOS PARES, YA SE GUARDAN LAS PREDICCIONES EN SUS CITIOS CORRESPONDIENTES.
+
+✅ ESTA TODO MAS ORGANIZADO PERO SOLO PREDICE QUE SUBE NUCA DICE QUE BAJA.
+
+✅ SE ELIMINO EL SESGO DE PREDICCION, YA NO SE ESTANCA UNICAMENTE EN UNA DIRECCION, LA CALIDAD DE LAS PREDICCIONES MEJORARON SIGNIFICATIVAMENTE.
+
+✅ IA 19 MEJORADA YA PREDICE COMO TANTO ARRIBA COMO ABAJO, LA CALIDAD DE LAS PREDICCIONES MEJORARON SIGNIFCATIVAMENTE, PERO AUN LE FALATA MEJORAR . IA 19.1.
+
+✅ LE APLIQUE MAS FILTROS AL MODELO COMO LA VOLATILIDAD, SPREED, VOLUMEN PARA MEJORAR LA PRESICION. FALTA HACER ALGUNOS AJUSTES PARA MEJORARLOS.
+
+✅ YA SE EVALUA CORRECTAMENTE EL TP, EL TP MINIMO ESTABA EN 0,0001 Y PASO A 0,00001.
+
+✅ EL TP MINIMMO SE CAMBIO A 0,00001 PERO SE VOLVIO A COLOCAR EN 0,0001. DEBEIDO A QUE ES MUY BAJO. FALTA MEJORAR LA PRESICION.
+
+✅ LE AGREGUE A LA OBTENCION DE DATOS 27 VARIABLES PARA MEJORAR LA PRESICION DE LAS PREDICCIONES, HASTA EL MOMENTO HA RESPONDIDO BIEN.
+
+✅ ESTOY EN EL PROCESO DE AGREGARLE APRENDIZAJE POR REFUERZO AL MODELO YA ENTRENADO, PARECE QUE YA ESTA INTEGRADO. 
+
+✅  YA LOS MODELO CARGAN CORRECTAMENTE, TENGO QUE COLOCAR QUE UNA VEZ LOS MODELOS SEAN CARGADO CORRECTAMNETE QUE SE VUELE LA FASE DE ENTRANAMIENTO.
+
+✅ YA SE SALTA EL ENTRENAMIENTO CUANDO SE ESCOGE UN MODELO, FALTA CORREGIR EL ESOCOGER EL MODELO DEL APRENDIZAJE POR REFUERZO.
+
+✅ YA LA FUNCION CON APRENDIZAJE POR REFUERZO YA ESTA INTEGRADA, FALTA VOLVER A ELEGIR EL MODELO ANTES DE ENVIAR LAS OPERCACIONES QUE NO LO HACE,
+    FALTA CORREGIR LOS NIVELES DE  SPREED QUE ESTAN DEMASIADOS ALTOS Y POR ESO NO SE PERMITEN MANDAR LAS OPERACIONES.
+
+✅ YA LAS OPERACIONES SE ENVIAN, PERO SOLO UNA, TENGO QUE COLOCAR QUE ENVIE TODOS LOS SIMBOLOS AL MISMO TIEMPO EL CONTEO DE LAS PREDICCIONES ESTA MAL,
+    TAMBIEN DEBO ORGANZARLO UN POCO.
+
+✅ YA SE ENVIAN TODAS LA OPERACIONES AL MISMO TIEMPO. CADA UNA CON SUS RESPECTIVOS TP. FALTA CORREGIR EL CONTEO DEL APRENDIZAJE POR REFUERZO.
+    
+    
+✅ LE INTEGRE LA OPCION DE ENTRENAR NUEVO MODELO Y EL MAIN NO SE LO SALTA. 
+    
+✅ CAMBIE EL TRABAJO CON LOS PARES DE DIVISAS, AHORA SOLO TENGO UN SOLO PAR PERO ESE PAR ABRE 10 OPERACIONES AL MISMO TIEMPO, LE FALTA INTEGRARLE EL APRENDIZAJE POR REFUERZO.   
+    
+✅ LE AGREGUE LA LOGICA DE CERRAR LA OPERACION AUTOMATICAMENTE CUANDO ALCANCE LO +0.20 DE GANACIA PERO AVACES FALLA. DEBO CORREGIRLA.   
+    
+
+✅ AL MANDAR LAS OPERACIONES SE MUESTRA EL PRECIO DE EJECUCION. ME FALTA CORREGIR QUE EL TP ESTA MAL UBICADO.  ( IA - 20.9.1 )
+    
+
+✅ YA EL TP SE CORRIGE AUTOMATICAMENTE PERO, HAY VECES QUE FALLA.   ( IA - 20.9.2)
+    
+
+✅ BAJE EL TP A +0.10 PERO A VECES FALLA, ME GSUTO QUE IDENTIFICA CUANDO LAS OPERACIONES SE CIEERAN  POR ALCANZAR EL TP (IA - 20.9.3)   
+
+
+✅ YA EL TP ESTA FIJO A +0.10 DE GANANCIA ( IA - 20.9.4).  
+
+
+✅ LE AGREGUE EL PODER VER EL TIKECT CON SE CERRO CON EL CIERRE ANTICIPADO Y CON EL TIEMPO, YA LOS LOGGING SE REGISTRAN CORRECTAMENTE. AUNQUE FALTA UNAS  MODIFICACIONES PARA QUE SE VEA MEJOR. (IA - 20.9.5).
+    
+    
+✅ YA CORREGI LOS LOGGING QUE ESTABAN MAL UBICADOS, FALTA SOLUINAR EL POR QUE SE ESTAN CERRANDO LAS OPERACIONES DE MANERA EXTERNA. (IA - 20.9.6).  
+    
+    
+✅ ORGANICE UN POCO LOS LOGGING LE CAMBIE EL EMOJI Y LE AGREGUE QUE SEA EL TIKECT DE LA OPERACION QUE CORRIGIO A " TP AJUSTADO".  (IA - 20.9.7).
+    
+    
+✅ MEJORE LA FUNCION "execute_trade_multiple"  LE AGREGUE ALEATORIEDAD A LA FUNCION, PARA EVIAR EL CIERRE EN 0.00 USD. (IA - 20.9.8).
+    
+    
+✅ LE AGREGUE A LA FUNCION   "cargar_modelo" LA OPCION DE ELIMINAR MODELOS. (IA - 20.9.9). 
+    
+    
+✅ LE AGREGUE A LA FUNCION   "cargar_modelo"  EL MAXIMIZAR, MINIMIZAR, Y LA X DE LAS VENTANAS. (IA - 20.9.10).
+    
+    
+✅ LA LOGICA DE CONEXION EN EL MAIN ESTABA MALA, ENTONCES ESTOY APLICANDO LAS INTERFACES UNA POR UNA, LA PANTALLA DE BLOQUEO FUNCIONA CORRECTAMENTE Y PASA LA SIGUIENTE FUNCION CORRECTAMENTE. (IA - 20.10.11).
+
+    
+✅ LA LOGICA DE "CONEXION" EN EL MAIN A MT5 YA FUNCIONA SU FUNCION ES "connect_to_mt5", LE CAMBIE EL MAINLOOP POR TOPLEVEL Y FRAME. (IA - 20.10.12). 
+    
+
+✅ LA LOGICA DE "get_account_equity" EN EL MAIN YA FUNCIONA CORRECTAMENTE CON SU INTERFAZ Y LE DA CONTINUIDAD A LA SIGUIENTE FUNCION. (IA - 20.1O.13 ).
+    
+
+✅ LA LOGICA Y LA INTERFAZ GRAFICA DE "calculate_risk_and_capital_distribution" FUNCIONA CORRECTAMENTE EN EL MAIN Y LE DA CONTINIUDAD A LA SIGUIENTE FUNCION EN EL MAIN. (IA - 20.10.14).
+    
+    
+    
+✅ LA LOGICA Y LA INTERFAZ GRAFICA DE "cargar_modelo"  FUNCIONA CORRECTAMENTE EN EL MAIN Y LE DA CONTINUIDAD A LA SIGUIENTE FUNCION EN EL MAIN. (IA - 20.10.15).
+    
+    
+✅ LA VENTANA DE CONEXION A MT5 SALE CORRECTAMENTE SIN ERRORES. (IA - 20.10.16). 
+    
+    
+
+✅ LA VENTANA DE DE "get_account_equity" , "calculate_risk_and_capital_distribution" Y "cargar_modelo" SALEN CORRECTAMENTE EN EL MAIN. (IA - 20.10.17).
+    
+    
+
+✅ LA VENTANA DE "entrenar_modelo" APARECE PERO RETRAZADA, FALTA CORREGIR , ESA PARTE, SE CORRIGE COLOCANADOLE INTERFAZ A LAS FUNCIONES ANTERIORES PARA QUE EL HILO DE MAINLOOP NO SE ROMPA. 
+   TAMABIEN A "entrenar_modelo" LE FALTA LA LOGICA DE GUARDADAR EL MODELO EN EL BOTON. (IA - 20.10.18)
+    
+    
+
+✅ LA VENTANA DE "obtener_datos_mt5" Y "preparar_datos" FUNCIONAN CORRECTAMENTE. FALTA ES MEJORAR EL DISEÑO PERO LA INTERFAZ EN EL MAIN FUNCIONA BIEN. FALTA CORREGIR LA INTERFAZ DE "entrenar_modelo" . (IA - 20.10.19).
+    
+    
+
+✅ LA VENTANA DE "calculate_risk_and_capital_distribution"  YA APARECE CON UNA INTERFAZ MEJOR Y FUNNCIONA CORRECTAMENTE EN EL MAIN. SE LE AGREGO UNA CONFIRMACION PARA CERRAR EL PROGRAMA. ( IA - 20.10.20).
+    
+    
+    
+✅ LA VENTANA DE "cargar_modelo" YA SE LE APLICO LA CONFIRMACION DE CIERRE EN LOS CONTROLES DE VENTANA. (IA - 20.10.21).
+    
+    IA - 20.10.21 """
+    
+
+
+
+
+
+
+".\mi_entorno_1\Scripts\Activate"
+
+"numero de cuenta" "197115903"
+
+"servidor" "Exness-MT5Trial11"
+
+".\mi_entorno_1\Scripts\Activate"
+
+
+
+"ACTUALIZAR PIP: winget upgrade --all"
+
+
+
+" PROMT:  ACTUA COMO UN PROGRAMADOR SEÑOR EXPERTO EN DESARROLLO DE INTERFACES Y DISEÑO.  EL RESTO LO DEJAS EXCATAMENTE IGUAL, NO CAMBIES NUMEROS, NO CAMBIES NOMBRES, NO CAMBIES LA LOGICA, NO QUITES NADA, NO OMITAS NADA, DAME LA FUNCION COMPLETA Y NO LO HAGAS EN LIENZO  "
+
+" PROMT:  ACTUA COMO UN PROGRAMADOR SEÑOR EXPERTO EN IA Y TRADING ALGORITMICO. EL RESTO LO DEJAS EXCATAMENTE IGUAL, NO CAMBIES NUMEROS, NO CAMBIES NOMBRES, NO CAMBIES LA LOGICA, NO QUITES NADA, NO OMITAS NADA, DAME LA FUNCION COMPLETA Y NO LO HAGAS EN LIENZO"
+
+"EFECTO DE BOTOENES: ACTIVE STATE, HOVER EFFECT  "
+
+"EFECTO PARA CASILLAS DE TEXTO INTERACTIVO: placeholder"
+
+"COLORES USADOS: BLANCO, GRIS CLARO, GRIS MEDIO, GRIS OSCURO, VERDE, VERDE CLARO, VERDE OSCURO,AZUL, AZUL CALRO,AZUL OSCURO, NEGRO"
+
+
+# 📁 Módulos del sistema
+import os
+import sys
+import re
+import time
+import pickle
+import locale
+import logging
+from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
+
+# 📊 Bibliotecas científicas y numéricas
+import numpy as np
+import pandas as pd
+import scipy as sp
+
+# 🤖 TensorFlow y Keras
+import tensorflow as tf
+from tensorflow import keras
+
+# Definir capas y modelos
+Input = tf.keras.layers.Input
+LSTM = tf.keras.layers.LSTM
+Dense = tf.keras.layers.Dense
+Attention = tf.keras.layers.Attention
+Dropout = tf.keras.layers.Dropout
+
+Model = tf.keras.models.Model
+Sequential = tf.keras.models.Sequential
+load_model = tf.keras.models.load_model
+
+# Optimizadores y callbacks
+Adam = tf.keras.optimizers.Adam
+EarlyStopping = tf.keras.callbacks.EarlyStopping
+ReduceLROnPlateau = keras.callbacks.ReduceLROnPlateau
+EarlyStopping = tf.keras.callbacks.EarlyStopping
+ReduceLROnPlateau = tf.keras.callbacks.ReduceLROnPlateau
+
+# 📚 Scikit-learn
+from sklearn.model_selection import train_test_split, TimeSeriesSplit
+from sklearn.metrics import accuracy_score, mean_absolute_error, r2_score
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+# 💹 MetaTrader5
+import MetaTrader5 as mt5
+
+# 🧰 Interfaz gráfica Tkinter
+import tkinter as tk
+from tkinter import Listbox, Scrollbar, messagebox
+
+# 📬 Importaciones del sistema personalizado
+from enviar_operacion import *
+from bloqueo_de_pantalla import *
+
+# ⚙️ Configuración global
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Desactiva optimizaciones de oneDNN en TensorFlow
+scaler = MinMaxScaler(feature_range=(0, 1))  # Escalador global para normalización
+
+import tkinter as tk
+from tkinter import Toplevel
+from PIL import Image, ImageTk
+import numpy as np
+import logging
+import tensorflow as tf
+
+
+
+
+
+
+
+
+
+
+# ⚡ Buffer para almacenar errores pasados
+error_memoria = []
+scaler = StandardScaler()
+def cargar_modelo():   
+    """Carga un modelo .keras o .h5 desde GUI. Si no hay, crea uno nuevo."""
+   
+
+    # 📁 Ruta base donde se buscan modelos entrenados
+    ruta_modelos = r"C:\Users\pc\Desktop\PLAN CLASE HILDER\mi_entorno_1"
+
+    # 🔍 Buscar archivos .keras o .h5 existentes en la ruta
+    modelos_disponibles = [f for f in os.listdir(ruta_modelos) if f.endswith(".keras") or f.endswith(".h5")]
+
+    # 🚨 Si no hay modelos, se crea uno nuevo por defecto
+    if not modelos_disponibles:
+        logging.info("📭 No se encontró ningún modelo guardado. Creando uno nuevo...")
+        modelo = crear_nuevo_modelo()
+        ruta_nuevo = os.path.join(ruta_modelos, "modelo_entrenado.keras")
+        modelo.save(ruta_nuevo)
+        return modelo, ruta_nuevo, True
+
+    # 🧠 Variables internas para capturar modelo y bandera de creación
+    nonlocal_modelo = []
+    bandera_creado = [False]
+
+    # 🖼️ Preparar raíz de Tkinter si aún no existe
+    root = tk._default_root
+    if root is None:
+        root = tk.Tk()
+        root.withdraw()
+
+    # 🪟 Crear ventana secundaria para selección del modelo
+    ventana = tk.Toplevel()
+    ventana.title("Seleccionar modelo")
+    ventana.state('zoomed')
+    ventana.configure(bg="#f9f9f9")  # blanco muy claro
+
+    # ⚠️ Función: confirmar salida con advertencia estilo Windows
+    def confirmar_salida():
+        if messagebox.askokcancel("SALIR DEL PROGRAMA", "¿Desea cerrar el programa?"):
+            ventana.destroy()
+            os._exit(0)  # 🔥 Forzar cierre completo del proceso
+
+    # ⛔ Asignar protocolo de cierre de ventana
+    ventana.protocol("WM_DELETE_WINDOW", confirmar_salida)
+
+    # 🎯 Función: cargar modelo seleccionado en el listbox
+    def cargar_seleccion():
+        seleccion = listbox.curselection()
+        if seleccion:
+            modelo_nombre = listbox.get(seleccion[0])
+            ruta_modelo = os.path.join(ruta_modelos, modelo_nombre)
+            try:
+                modelo = load_model(ruta_modelo)
+                logging.info(f"✅ Modelo '{modelo_nombre}' cargado correctamente.")
+                messagebox.showinfo("Carga exitosa", f"Modelo '{modelo_nombre}' cargado correctamente.")
+                nonlocal_modelo.append((modelo, ruta_modelo))
+                bandera_creado[0] = False
+                ventana.destroy()
+            except Exception as e:
+                logging.warning(f"❌ Error al cargar el modelo: {e}")
+                messagebox.showwarning("Error", f"No se pudo cargar el modelo. Se creará uno nuevo.")
+                modelo = crear_nuevo_modelo()
+                ruta_nuevo = os.path.join(ruta_modelos, "modelo_entrenado.keras")
+                modelo.save(ruta_nuevo)
+                nonlocal_modelo.append((modelo, ruta_nuevo))
+                bandera_creado[0] = True
+                ventana.destroy()
+        else:
+            messagebox.showwarning("Advertencia", "Por favor selecciona un modelo.")
+
+    # 🆕 Función: crear nuevo modelo manualmente
+    def crear_nuevo():
+        logging.info("📦 Opción seleccionada: Crear nuevo modelo manualmente.")
+        modelo = crear_nuevo_modelo()
+        ruta_nuevo = os.path.join(ruta_modelos, "modelo_entrenado.keras")
+        modelo.save(ruta_nuevo)
+        nonlocal_modelo.append((modelo, ruta_nuevo))
+        bandera_creado[0] = True
+        ventana.destroy()
+
+    # ❌ Función: cancelar y crear nuevo modelo automáticamente
+    def cancelar():
+        logging.info("🚫 Cancelado por el usuario. Se creará un nuevo modelo.")
+        modelo = crear_nuevo_modelo()
+        ruta_nuevo = os.path.join(ruta_modelos, "modelo_entrenado.keras")
+        modelo.save(ruta_nuevo)
+        nonlocal_modelo.append((modelo, ruta_nuevo))
+        bandera_creado[0] = True
+        ventana.destroy()
+
+    # 🗑️ Función: eliminar modelo seleccionado (clic derecho)
+    def eliminar_modelo(event):
+        seleccion = listbox.curselection()
+        if seleccion:
+            modelo_nombre = listbox.get(seleccion[0])
+            confirmacion = messagebox.askyesno("Eliminar modelo", f"¿Estás seguro de eliminar '{modelo_nombre}'?")
+            if confirmacion:
+                ruta_modelo = os.path.join(ruta_modelos, modelo_nombre)
+                try:
+                    os.remove(ruta_modelo)
+                    listbox.delete(seleccion[0])
+                    logging.info(f"🗑️ Modelo '{modelo_nombre}' eliminado correctamente.")
+                except Exception as e:
+                    logging.error(f"❌ No se pudo eliminar el modelo '{modelo_nombre}': {e}")
+                    messagebox.showerror("Error", f"No se pudo eliminar el modelo: {e}")
+
+    # 📋 Título de la lista de modelos disponibles
+    tk.Label(
+        ventana,
+        text="📁 Modelos .keras / .h5 encontrados:",
+        font=("Arial", 14, "bold"),
+        bg="#f9f9f9",
+        fg="#222222"
+    ).pack(pady=10)
+
+    # 🧱 Frame contenedor para listbox y scrollbar
+    frame = tk.Frame(ventana, bg="#f9f9f9")
+    frame.pack()
+
+    # 📜 Scrollbar vertical
+    scrollbar = Scrollbar(frame)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    # 📦 Listbox de modelos disponibles
+    listbox = Listbox(
+        frame,
+        width=70,
+        height=20,
+        font=("Courier", 12),
+        bg="#ffffff",
+        fg="#000000",
+        selectbackground="#007acc",
+        selectforeground="white",
+        yscrollcommand=scrollbar.set
+    )
+    for modelo in modelos_disponibles:
+        listbox.insert(tk.END, modelo)
+    listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+    scrollbar.config(command=listbox.yview)
+
+    # 🖱️ Click derecho para eliminar modelo
+    listbox.bind("<Button-3>", eliminar_modelo)
+
+    # 🎨 Función para aplicar estilo a los botones
+    def estilo_boton(boton, bg, hover, active):
+        boton.configure(
+            bg=bg,
+            fg="white",
+            activebackground=active,
+            relief="flat",
+            font=("Arial", 11, "bold"),
+            padx=10,
+            pady=7,
+            cursor="hand2"
+        )
+        boton.bind("<Enter>", lambda e: boton.config(bg=hover))
+        boton.bind("<Leave>", lambda e: boton.config(bg=bg))
+
+    # ✅ Botón: cargar modelo seleccionado
+    btn_cargar = tk.Button(ventana, text="✅ Cargar modelo", command=cargar_seleccion, width=30)
+    estilo_boton(btn_cargar, "#007acc", "#005f99", "#003f66")
+    btn_cargar.pack(pady=5)
+
+    # 🆕 Botón: crear nuevo modelo
+    btn_crear = tk.Button(ventana, text="🆕 Crear nuevo modelo", command=crear_nuevo, width=30)
+    estilo_boton(btn_crear, "#28a745", "#218838", "#1e7e34")
+    btn_crear.pack(pady=5)
+
+    # ❌ Botón: cancelar y crear modelo nuevo
+    btn_cancelar = tk.Button(ventana, text="❌ Cancelar", command=cancelar, width=30)
+    estilo_boton(btn_cancelar, "#6c757d", "#5a6268", "#343a40")
+    btn_cancelar.pack(pady=5)
+
+    # ⏸️ Esperar a que la ventana se cierre antes de continuar
+    ventana.grab_set()
+    ventana.wait_window()
+
+    # 🔄 Devolver modelo cargado o creado
+    if nonlocal_modelo:
+        return nonlocal_modelo[0][0], nonlocal_modelo[0][1], bandera_creado[0]
+    else:
+        modelo = crear_nuevo_modelo()
+        ruta_nuevo = os.path.join(ruta_modelos, "modelo_entrenado.keras")
+        modelo.save(ruta_nuevo)
+        return modelo, ruta_nuevo, True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def crear_nuevo_modelo(units_1=64, units_2=32, dense_units=16,
+                       dropout_rate=0.2, filtros_cnn=32, kernel_size=3,
+                       extraer_features_para_xgboost=False, input_timesteps=50, input_features=27):
+    """
+    Modelo CNN + LSTM + MultiHeadAttention para scalping de 5 segundos.
+    Estructura híbrida para procesar secuencias y patrones de alta frecuencia.
+
+    Parámetros clave:
+    - input_timesteps: número de pasos de tiempo (ej: 50)
+    - input_features: número de features personalizados (ej: 27)
+
+    Devuelve:
+    - modelo compilado
+    - opcionalmente: extractor de features si se activa `extraer_features_para_xgboost`
+    """
+    import tensorflow as tf
+
+    # ✅ Entrada adaptable
+    inputs = tf.keras.Input(shape=(input_timesteps, input_features), name="input_layer")
+
+    # 🧠 Bloque CNN
+    x = tf.keras.layers.Conv1D(filters=filtros_cnn, kernel_size=kernel_size, activation='relu',
+                               padding='same', kernel_initializer="he_uniform")(inputs)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.SpatialDropout1D(rate=dropout_rate)(x)
+
+    # 🔁 LSTM 1
+    x = tf.keras.layers.LSTM(units_1, return_sequences=True,
+                             kernel_initializer="glorot_uniform", recurrent_initializer="orthogonal",
+                             bias_initializer="zeros", recurrent_regularizer=tf.keras.regularizers.l2(1e-4),
+                             dropout=0.1, recurrent_dropout=0.1)(x)
+    x = tf.keras.layers.LayerNormalization()(x)
+    x = tf.keras.layers.Dropout(dropout_rate)(x)
+
+    # 🔁 Multi-Head Attention robusta
+    # ✅ Validación de divisibilidad para evitar errores en key_dim
+    key_dim = max(1, units_1 // 4)
+    num_heads = min(8, units_1 // key_dim)
+
+    attn_out = tf.keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=key_dim, dropout=0.1)(x, x)
+    x = tf.keras.layers.Add()([x, attn_out])
+    x = tf.keras.layers.LayerNormalization()(x)
+    x = tf.keras.layers.Dropout(0.1)(x)
+
+    # 🔁 LSTM 2
+    x = tf.keras.layers.LSTM(units_2, return_sequences=False,
+                             kernel_initializer="glorot_uniform", recurrent_initializer="orthogonal",
+                             bias_initializer="zeros", recurrent_regularizer=tf.keras.regularizers.l2(1e-4),
+                             dropout=0.1, recurrent_dropout=0.1)(x)
+    x = tf.keras.layers.LayerNormalization()(x)
+    x = tf.keras.layers.Dropout(dropout_rate)(x)
+
+    # 🔥 Feature vector
+    features = tf.keras.layers.Dense(dense_units, activation="relu",
+                                     kernel_initializer="he_normal", bias_initializer="zeros",
+                                     kernel_regularizer=tf.keras.regularizers.l2(1e-4), name="feature_vector")(x)
+    features = tf.keras.layers.BatchNormalization()(features)
+
+    # 🔚 Salida residual + directa
+    raw_output = tf.keras.layers.Dense(1, activation="linear")(features)
+    residual = tf.keras.layers.Dense(1, activation="linear")(x)
+    outputs = tf.keras.layers.Add(name="prediccion")([raw_output, residual])
+
+    modelo = tf.keras.Model(inputs=inputs, outputs=outputs)
+
+    modelo.compile(
+        optimizer=tf.keras.optimizers.AdamW(learning_rate=0.0008, weight_decay=1e-4, epsilon=1e-7, amsgrad=True),
+        loss=tf.keras.losses.Huber(delta=1.0),
+        metrics=[
+            tf.keras.metrics.MeanAbsoluteError(),
+            tf.keras.metrics.RootMeanSquaredError()
+        ]
+    )
+
+    if extraer_features_para_xgboost:
+        extractor = tf.keras.Model(inputs=inputs, outputs=features)
+        return modelo, extractor
+
+    return modelo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import tkinter as tk
+from tkinter import ttk
+import threading
+import pandas as pd
+import numpy as np
+import time
+import logging
+import MetaTrader5 as mt5
+from sklearn.preprocessing import MinMaxScaler
+import sys
+
+def obtener_datos_mt5(lista_simbolos, timeframe, n_candles, scaler=None):  
+    resultado = {'datos': None, 'confirmado': False}
+
+    def ejecutar_logica(i=0, dfs=None):
+        nonlocal resultado
+
+        if dfs is None:
+            dfs = []
+
+        if scaler is None:
+            _scaler = MinMaxScaler(feature_range=(0, 1))
+        else:
+            _scaler = scaler
+
+        columnas_modelo = [
+            'precio', 'volumen', 'spread', 'volatilidad', 'slope_3', 'ema_3', 'ema_8', 'ema_diff',
+            'momentum_n', 'direccion_prev', 'volumen_tick_n', 'tick_up', 'tick_down', 'tick_imbalance_n',
+            'micro_tendencia_3t', 'aceleracion_n', 'spread_movil', 'cambio_spread_n',
+            'max_local', 'min_local', 'dist_max', 'dist_min', 'proximidad_pivote',
+            'candle_body_size_n', 'tiempo_desde_ultimo_extremo',
+            'hora_normalizada', 'zscore_volatilidad'
+        ]
+
+        if i >= len(lista_simbolos):
+            if not dfs:
+                logging.error("❌ No se pudo obtener datos válidos de ningún símbolo.")
+                resultado['datos'] = None
+            else:
+                datos_unificados = pd.concat(dfs, ignore_index=True)
+                columnas_faltantes = set(columnas_modelo) - set(datos_unificados.columns)
+                columnas_extra = set(datos_unificados.columns) - set(columnas_modelo)
+                if columnas_faltantes or columnas_extra:
+                    logging.error(f"❌ Validación columnas: Faltantes={columnas_faltantes}, Extra={columnas_extra}")
+                else:
+                    logging.info("✅ Todas las columnas están correctas (27 variables completas).")
+                resultado['datos'] = datos_unificados
+
+            boton_aceptar.config(state='normal')
+            boton_cancelar.config(state='normal')
+            return
+
+        simbolo = lista_simbolos[i]
+        intento = 0
+        while intento < 10:
+            try:
+                rates = mt5.copy_rates_from_pos(simbolo, timeframe, 0, n_candles)
+                if rates is None or len(rates) < n_candles:
+                    raise ValueError("Datos insuficientes")
+
+                df = pd.DataFrame(rates)
+                if df.empty or df.isnull().values.any() or 'close' not in df.columns:
+                    raise ValueError("Datos inválidos")
+
+                df = df[['time', 'open', 'high', 'low', 'close']].copy()
+                df['time'] = pd.to_datetime(df['time'], unit='s')
+                df['symbol'] = simbolo
+
+                df['velocidad'] = df['close'].diff().fillna(0.0)
+                df['close_shift'] = df['close'].shift(1)
+                df['tr'] = df[['high', 'low', 'close_shift']].apply(
+                    lambda row: max(
+                        row['high'] - row['low'],
+                        abs(row['high'] - row['close_shift']),
+                        abs(row['low'] - row['close_shift'])
+                    ), axis=1)
+                df['atr'] = df['tr'].rolling(14).mean()
+
+                ticks = mt5.copy_ticks_from(simbolo, int(df['time'].iloc[0].timestamp()), n_candles, mt5.COPY_TICKS_ALL)
+                ticks_df = pd.DataFrame(ticks)
+                if not ticks_df.empty:
+                    ticks_df['time'] = pd.to_datetime(ticks_df['time'], unit='s')
+                    ticks_df = ticks_df.groupby("time").agg({"ask": "last", "bid": "last"}).reset_index()
+                    df = df.merge(ticks_df, on="time", how="left")
+                    df['spread'] = (df['ask'] - df['bid']).ffill().fillna(0.0)
+                else:
+                    df['spread'] = 0.0
+
+                _scaler.fit(df[['close']])
+                df['close'] = _scaler.transform(df[['close']]).astype(np.float32)
+
+                df = df.rename(columns={
+                    'close': 'precio',
+                    'velocidad': 'volumen',
+                    'atr': 'volatilidad'
+                })
+
+                df['slope_3'] = (df['precio'] - df['precio'].shift(3)) / 3
+                df['ema_3'] = df['precio'].ewm(span=3, adjust=False).mean()
+                df['ema_8'] = df['precio'].ewm(span=8, adjust=False).mean()
+                df['ema_diff'] = df['ema_3'] - df['ema_8']
+                df['momentum_n'] = df['precio'].diff(2).fillna(0.0)
+                df['direccion_prev'] = np.sign(df['precio'].diff().fillna(0.0))
+                df['volumen_tick_n'] = df['precio'].rolling(2).count().fillna(0.0)
+                dif = df['precio'].diff().fillna(0.0)
+                df['tick_up'] = (dif > 0).astype(int)
+                df['tick_down'] = (dif < 0).astype(int)
+                df['tick_imbalance_n'] = (df['tick_up'].rolling(5).sum() - df['tick_down'].rolling(5).sum()) / 5.0
+                df['tick_imbalance_n'] = df['tick_imbalance_n'].fillna(0.0)
+                df['micro_tendencia_3t'] = np.sign(df['precio'].diff(1) + df['precio'].diff(2) + df['precio'].diff(3)).fillna(0.0)
+                df['aceleracion_n'] = df['volumen'].diff().fillna(0.0)
+                df['spread_movil'] = df['spread'].rolling(5).mean()
+                df['cambio_spread_n'] = ((df['spread'] - df['spread_movil']) / (df['spread_movil'] + 1e-6)).fillna(0.0)
+                df['max_local'] = df['precio'].rolling(10).max()
+                df['min_local'] = df['precio'].rolling(10).min()
+                df['dist_max'] = abs(df['precio'] - df['max_local'])
+                df['dist_min'] = abs(df['precio'] - df['min_local'])
+                df['proximidad_pivote'] = np.minimum(df['dist_max'], df['dist_min']) / (df['volatilidad'] + 1e-6)
+                cuerpo = abs(df['precio'] - df['open'])
+                df['candle_body_size_n'] = (cuerpo / (df['volatilidad'] + 1e-6)).fillna(0.0)
+
+                df['tiempo_desde_ultimo_extremo'] = (
+                    df[::-1]['precio']
+                    .expanding()
+                    .apply(lambda x: len(x) - np.argmax((x == x.max()) | (x == x.min())), raw=False)
+                    .fillna(0.0)
+                )
+                df['hora_normalizada'] = df['time'].dt.hour / 24.0
+                df['zscore_volatilidad'] = (
+                    (df['volatilidad'] - df['volatilidad'].rolling(20).mean()) /
+                    (df['volatilidad'].rolling(20).std() + 1e-6)
+                ).fillna(0.0)
+
+                for col in columnas_modelo:
+                    if col not in df.columns:
+                        df[col] = 0.0
+                df[columnas_modelo] = df[columnas_modelo].fillna(0.0).astype(np.float32)
+
+                dfs.append(df[columnas_modelo])
+                logging.info(f"📈 {simbolo} procesado correctamente: Último precio {df['precio'].iloc[-1]}")
+                break
+
+            except Exception as e:
+                intento += 1
+                logging.warning(f"⚠️ Error procesando {simbolo} (intento {intento}): {e}")
+                time.sleep(0.5)
+                if intento >= 10:
+                    logging.error(f"🚫 Fallo permanente para {simbolo}, se omite.")
+                    break
+
+        barra['value'] = ((i + 1) / len(lista_simbolos)) * 100
+        ventana.after(50, ejecutar_logica, i + 1, dfs)
+
+    def aceptar():
+        resultado['confirmado'] = True
+        ventana.destroy()
+
+    def cancelar():
+        resultado['confirmado'] = False
+        ventana.destroy()
+        sys.exit()
+
+    ventana = tk.Toplevel()
+    ventana.title("OBTENIENDO DATOS DE MT5")
+    ventana.geometry("500x200")
+    ventana.configure(bg="#f0f0f0")
+    ventana.resizable(False, False)
+
+    frame_contenedor = tk.Frame(ventana, bg="#f0f0f0")
+    frame_contenedor.pack(expand=True, fill="both", padx=10, pady=10)
+
+    ttk.Label(frame_contenedor, text="Cargando datos históricos...", font=("Segoe UI", 12)).pack(pady=10)
+
+    barra = ttk.Progressbar(frame_contenedor, orient="horizontal", length=400, mode="determinate")
+    barra.pack(pady=10)
+
+    frame_botones = tk.Frame(frame_contenedor, bg="#f0f0f0")
+    frame_botones.pack(pady=15)
+
+    boton_aceptar = tk.Button(frame_botones, text="ACEPTAR ✅", bg="#4CAF50", fg="white", font=("Segoe UI", 10),
+                              relief="flat", width=15, state='disabled', command=aceptar)
+    boton_aceptar.pack(side="left", padx=10)
+
+    boton_cancelar = tk.Button(frame_botones, text="CANCELAR ❌", bg="#F44336", fg="white", font=("Segoe UI", 10),
+                               relief="flat", width=15, command=cancelar)
+    boton_cancelar.pack(side="right", padx=10)
+
+    # 🔁 Iniciar la carga paso a paso sin hilos
+    ventana.after(100, ejecutar_logica)
+
+    # ⏳ Esperar que se cierre la ventana antes de continuar
+    ventana.wait_window()
+
+    # ✔️ Retornar según la decisión del usuario
+    if resultado['confirmado']:
+        return resultado['datos']
+    else:
+        logging.error("🚫 El usuario canceló la carga de datos.")
+        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import tkinter as tk
+from tkinter import ttk
+import numpy as np
+import sys
+
+def preparar_datos(df, secuencia=50):
+    """
+    Prepara los datos para el entrenamiento del modelo usando todas las variables definidas en columnas_modelo.
+    """
+
+    ventana = tk.Toplevel()
+    ventana.title("PREPARANDO DATOS")
+    ventana.configure(bg="white")
+    ventana.geometry("600x280")
+    ventana.resizable(False, False)
+    ventana.attributes('-topmost', True)
+
+    frame = tk.Frame(ventana, bg="white")
+    frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+    label_titulo = tk.Label(frame, text="PREPARANDO DATOS", font=("Segoe UI", 16, "bold"), bg="white", fg="black")
+    label_titulo.pack(pady=(10, 10))
+
+    progreso_label = tk.Label(frame, text="🔄 Procesando...", font=("Segoe UI", 12), bg="white", fg="gray")
+    progreso_label.pack(pady=(0, 10))
+
+    barra = ttk.Progressbar(frame, mode="indeterminate", length=400)
+    barra.pack(pady=(0, 10))
+    barra.start(12)
+
+    X, y = None, None
+    datos_listos = False
+
+    try:
+        progreso_label.config(text="📊 Verificando columnas...")
+
+        if df is None or df.empty:
+            raise ValueError("El DataFrame de entrada está vacío o es None.")
+
+        columnas_modelo = [
+            'precio', 'volumen', 'spread', 'volatilidad',
+            'slope_3', 'ema_3', 'ema_8', 'ema_diff',
+            'momentum_n', 'direccion_prev', 'volumen_tick_n',
+            'tick_up', 'tick_down', 'tick_imbalance_n',
+            'micro_tendencia_3t', 'aceleracion_n',
+            'spread_movil', 'cambio_spread_n',
+            'max_local', 'min_local', 'dist_max', 'dist_min', 'proximidad_pivote',
+            'candle_body_size_n', 'tiempo_desde_ultimo_extremo',
+            'hora_normalizada', 'zscore_volatilidad'
+        ]
+
+        faltantes = [col for col in columnas_modelo if col not in df.columns]
+        if faltantes:
+            raise ValueError(f"❌ Faltan columnas requeridas para el modelo: {faltantes}")
+
+        progreso_label.config(text="🔍 Limpiando datos...")
+        df_modelo = df[columnas_modelo].astype(np.float32)
+        df_modelo = df_modelo.replace([np.inf, -np.inf], np.nan).dropna()
+
+        if len(df_modelo) <= secuencia:
+            raise ValueError("No hay suficientes datos después de limpiar para formar secuencias.")
+
+        progreso_label.config(text="📈 Construyendo secuencias...")
+        X, y = [], []
+        datos = df_modelo.values
+
+        for i in range(len(datos) - secuencia):
+            X.append(datos[i:i + secuencia])
+            y.append(datos[i + secuencia][0])
+
+        X = np.array(X, dtype=np.float32)
+        y = np.array(y, dtype=np.float32).reshape(-1, 1)
+
+        if np.isnan(X).any() or np.isinf(X).any():
+            raise ValueError("X contiene valores NaN o Inf después de la preparación.")
+        if np.isnan(y).any() or np.isinf(y).any():
+            raise ValueError("y contiene valores NaN o Inf después de la preparación.")
+
+        progreso_label.config(text="✅ Datos preparados correctamente.")
+        barra.stop()
+        datos_listos = True
+
+        boton_aceptar = tk.Button(frame, text="✅ ACEPTAR", bg="#2e8b57", fg="white",
+                                  font=("Segoe UI", 11, "bold"),
+                                  command=lambda: ventana.destroy())
+        boton_aceptar.pack(pady=(10, 5))
+
+    except Exception as e:
+        barra.stop()
+        progreso_label.config(text=str(e), fg="red")
+
+    boton_cancelar = tk.Button(frame, text="❌ CANCELAR", bg="#8b0000", fg="white",
+                               font=("Segoe UI", 11, "bold"),
+                               command=lambda: sys.exit())
+    boton_cancelar.pack(pady=(5, 10))
+
+    ventana.wait_window()
+
+    if datos_listos:
+        return True, X, y
+    else:
+        return False, None, None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def entrenar_modelo(modelo, X_train, y_train, X_test, y_test, precision_objetivo=0.86):
+    """Entrena el modelo en un solo intento con optimización extrema para garantizar mínimo 86% de precisión."""
+
+    global error_memoria
+    epochs = 20
+    mejor_precision = 0.0
+    mejor_modelo = None
+
+    colores = {
+        "fondo": "#ffffff",
+        "texto": "#000000",
+        "barra": "#007acc",
+        "hover": "#005f99",
+        "active": "#003f66",
+        "cancel_bg": "#880000",
+        "cancel_hover": "#660000",
+        "cancel_active": "#440000",
+        "entry_placeholder": "#777777",
+        "entry_border": "#000000"
+    }
+
+    root = tk.Toplevel()
+    root.title("🧠 Entrenamiento del Modelo")
+    root.state('zoomed')
+    root.configure(bg=colores["fondo"])
+    root.grab_set()
+
+    frame_central = tk.Frame(root, bg=colores["fondo"])
+    frame_central.place(relx=0.5, rely=0.5, anchor="center")
+
+    titulo = tk.Label(frame_central, text="ENTRENANDO MODELO", font=("Segoe UI", 22, "bold"),
+                      bg=colores["fondo"], fg=colores["texto"])
+    titulo.pack(pady=(0, 40))
+
+    canvas = tk.Canvas(frame_central, width=300, height=50, bg=colores["fondo"], highlightthickness=0)
+    canvas.pack(pady=(0, 35))
+
+    def dibujar_rect_redondeado(canvas, x1, y1, x2, y2, radio=10, **kwargs):
+        puntos = [
+            x1+radio, y1,
+            x2-radio, y1,
+            x2, y1,
+            x2, y1+radio,
+            x2, y2-radio,
+            x2, y2,
+            x2-radio, y2,
+            x1+radio, y2,
+            x1, y2,
+            x1, y2-radio,
+            x1, y1+radio,
+            x1, y1
+        ]
+        return canvas.create_polygon(puntos, smooth=True, **kwargs)
+
+    progreso_label = tk.Label(frame_central, text="0%", font=("Segoe UI", 18, "bold"),
+                              bg=colores["fondo"], fg=colores["texto"])
+    progreso_label.pack(pady=(0, 35))
+
+    entry_guardar_frame = tk.Frame(frame_central, bg=colores["entry_border"], padx=1, pady=1)
+    entry_guardar_inner = tk.Frame(entry_guardar_frame, bg="white")
+    entry_guardar = tk.Entry(entry_guardar_inner, font=("Segoe UI", 12), justify="center",
+                              fg=colores["entry_placeholder"], bd=0, width=24,
+                              highlightthickness=0, relief="flat", bg="white")
+    entry_guardar.insert(0, "GUARDAR MODELO")
+
+    def on_focus_in(event):
+        if entry_guardar.get() == "GUARDAR MODELO":
+            entry_guardar.delete(0, tk.END)
+            entry_guardar.config(fg=colores["texto"])
+
+    def on_focus_out(event):
+        if entry_guardar.get() == "":
+            entry_guardar.insert(0, "GUARDAR MODELO")
+            entry_guardar.config(fg=colores["entry_placeholder"])
+
+    entry_guardar.bind("<FocusIn>", on_focus_in)
+    entry_guardar.bind("<FocusOut>", on_focus_out)
+    entry_guardar.pack(ipady=6, ipadx=10)
+    entry_guardar_inner.pack()
+
+    cancelar = False
+
+    def cancelar_entrenamiento():
+        nonlocal cancelar
+        cancelar = True
+        root.destroy()
+
+    def on_enter(e): boton_cancelar.config(bg=colores["cancel_hover"])
+    def on_leave(e): boton_cancelar.config(bg=colores["cancel_bg"])
+    def on_press(e): boton_cancelar.config(bg=colores["cancel_active"])
+    def on_release(e): boton_cancelar.config(bg=colores["cancel_hover"])
+
+    boton_cancelar = tk.Button(
+        frame_central,
+        text="❌ CANCELAR ENTRENAMIENTO",
+        command=cancelar_entrenamiento,
+        bg=colores["cancel_bg"],
+        fg="white",
+        font=("Segoe UI", 11, "bold"),
+        activebackground=colores["cancel_active"],
+        relief="flat",
+        width=30,
+        height=2,
+        cursor="hand2"
+    )
+    boton_cancelar.bind("<Enter>", on_enter)
+    boton_cancelar.bind("<Leave>", on_leave)
+    boton_cancelar.bind("<ButtonPress-1>", on_press)
+    boton_cancelar.bind("<ButtonRelease-1>", on_release)
+
+    def actualizar_barra(valor):
+        canvas.delete("all")
+        ancho = 300
+        alto = 18
+        radio = 10
+        dibujar_rect_redondeado(canvas, 0, 0, ancho, alto, radio, fill="#000000", outline="")
+        gray = min(34 + int(1.5 * valor), 60)
+        color = f'#{gray:02x}{gray:02x}{gray:02x}'
+        barra_width = int(ancho * valor / 100)
+        if barra_width > 0:
+            dibujar_rect_redondeado(canvas, 0, 0, barra_width, alto, radio, fill=color, outline="")
+        canvas.create_text(ancho//2, alto//2, text=f"{valor}%", fill="white", font=("Segoe UI", 10, "bold"))
+        progreso_label.config(text=f"{valor}%")
+        root.update()
+
+    progreso_entrenamiento = {"valor": 0}
+
+    def on_epoch_end(epoch, logs=None):
+        if cancelar:
+            modelo.stop_training = True
+            return
+        progreso = int(((epoch + 1) / epochs) * 100)
+        progreso_entrenamiento["valor"] = progreso
+        actualizar_barra(progreso)
+
+    def lambda_callback():
+        def _callback(epoch, logs=None):
+            on_epoch_end(epoch, logs)
+        return tf.keras.callbacks.LambdaCallback(on_epoch_end=_callback)
+
+    # 🛑 Esperar hasta que la ventana esté completamente visible antes de iniciar el entrenamiento
+    root.wait_visibility()
+    root.update()
+
+    early_stopping = EarlyStopping(monitor="val_loss", patience=4, restore_best_weights=True, min_delta=1e-4)
+    lr_scheduler = ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, min_lr=1e-6)
+
+    historial = modelo.fit(
+        X_train, y_train,
+        epochs=epochs,
+        batch_size=64,
+        verbose=1,
+        validation_data=(X_test, y_test),
+        callbacks=[early_stopping, lr_scheduler, lambda_callback()]
+    )
+
+    precision = evaluar_modelo(modelo, X_test, y_test)
+    logging.info(f"📊 Entrenamiento único - Precisión: {precision:.4f} - Épocas: {epochs}")
+
+    if precision > mejor_precision:
+        mejor_precision = precision
+        mejor_modelo = modelo
+        guardar_modelo(mejor_modelo)
+
+    if error_memoria and len(error_memoria) >= 10 and np.mean(error_memoria[-10:]) > 0.01:
+        logging.warning("⚡ Error elevado en predicciones recientes. Reajustando hiperparámetros dinámicamente...")
+        modelo = crear_nuevo_modelo(units_1=256, units_2=128, dense_units=64, dropout_rate=0.3)
+        mejor_precision = 0
+
+    if precision >= precision_objetivo:
+        logging.info("✅ Precisión objetivo alcanzada en un solo intento. Entrenamiento finalizado.")
+    else:
+        logging.warning(f"⚠️ Precisión insuficiente ({precision:.4f}). Ajusta datos o hiperparámetros manualmente.")
+
+    actualizar_barra(100)
+    canvas.create_text(150, 33, text="✅ Completado", fill="#999999", font=("Segoe UI", 10, "bold"))
+    progreso_label.config(text="✅ ENTRENAMIENTO COMPLETADO")
+    entry_guardar_frame.pack(pady=40)
+    boton_cancelar.pack(pady=(0, 35))
+
+    root.update()
+    root.after(2500, root.destroy)
+
+    return mejor_modelo if mejor_modelo else modelo
+
+
+
+
+
+
+
+
+
+
+
+
+
+def evaluar_modelo(modelo, X_test, y_test):
+    """Evalúa la precisión del modelo usando R² en lugar de MAE."""
+    y_pred = modelo.predict(X_test)
+    r2 = r2_score(y_test, y_pred)
+    return r2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def guardar_modelo(modelo):
+    """Guarda el modelo entrenado en un archivo .keras en la ruta especificada."""
+    nombre = input("💾 Escribe el nombre con el que deseas guardar el modelo (sin extensión): ").strip()
+    if not nombre:
+        nombre = "modelo_entrenado"
+
+    ruta_keras = fr"C:\Users\pc\Desktop\PLAN CLASE HILDER\mi_entorno_1\{nombre}.keras"
+
+    try:
+        modelo.save(ruta_keras)
+        logging.info(f"💾 Modelo guardado correctamente en formato .keras: {ruta_keras}")
+    except Exception as e:
+        logging.error(f"❌ Error al guardar el modelo en formato .keras: {e}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def calcular_atr(simbolo, timeframe=mt5.TIMEFRAME_M1, periodos=14):
+    """
+    Calcula el Average True Range (ATR) para un símbolo dado.
+
+    Parámetros:
+    - simbolo (str): Símbolo del activo en MT5.
+    - timeframe (int): Timeframe de los datos (por defecto M1).
+    - periodos (int): Número de períodos para calcular el ATR.
+
+    Retorna:
+    - float: Valor del ATR.
+    """
+    try:
+        rates = mt5.copy_rates_from_pos(simbolo, timeframe, 0, periodos + 1)
+        if rates is None or len(rates) < periodos + 1:
+            raise ValueError(f"No se pudieron obtener suficientes datos para ATR ({simbolo})")
+
+        df = pd.DataFrame(rates)
+        df["high-low"] = df["high"] - df["low"]
+        df["high-close"] = abs(df["high"] - df["close"].shift(1))
+        df["low-close"] = abs(df["low"] - df["close"].shift(1))
+
+        df["true_range"] = df[["high-low", "high-close", "low-close"]].max(axis=1)
+        atr = df["true_range"].rolling(window=periodos).mean().iloc[-1]
+
+        return atr
+
+    except Exception as e:
+        logging.error(f"❌ Error al calcular ATR para {simbolo}: {str(e)}")
+        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def calcular_tp(precio_actual, simbolo, timeframe, direccion):
+    """
+    Calcula el Take Profit (TP) dinámicamente usando el ATR del símbolo en el timeframe dado.
+    El TP mínimo será adaptado por número de decimales según el símbolo y las restricciones del bróker (si están disponibles).
+    Se adapta según la dirección de la operación:
+    - Compra ("📈 SUBE"): TP por encima del precio actual.
+    - Venta  ("📉 BAJA"): TP por debajo del precio actual.
+    """
+    atr = calcular_atr(simbolo, timeframe)  # Obtener la volatilidad media del mercado
+    if atr is None:
+        logging.error(f"❌ No se pudo calcular el ATR para {simbolo}.")
+        return None
+
+    # Obtener información del símbolo
+    symbol_info = mt5.symbol_info(simbolo)
+    if symbol_info is None:
+        logging.error(f"❌ No se pudo obtener la información del símbolo {simbolo}.")
+        return None
+
+    # TP mínimo según los decimales del símbolo
+    min_tp_decimal = 1 / (10 ** symbol_info.digits)
+
+    # Asegurar que el TP mínimo sea al menos 0.0001 (ajustado según requerimiento)
+    min_tp_forzado = max(min_tp_decimal, 0.0001)
+
+    # Verificar si stops_level está disponible
+    stops_level = getattr(symbol_info, "stops_level", None)
+    if stops_level is not None:
+        stops_level_val = stops_level * symbol_info.point
+    else:
+        stops_level_val = 0  # Si no existe, se ignora como restricción mínima
+
+    # 🔹 Calcular spread actual (Ask - Bid)
+    tick_info = mt5.symbol_info_tick(simbolo)
+    if tick_info is None:
+        logging.warning(f"⚠️ No se pudo obtener el tick actual para calcular spread en {simbolo}.")
+        spread = 0
+    else:
+        spread = tick_info.ask - tick_info.bid
+
+    # 🔧 Calcular la distancia TP con base en ATR y restricciones mínimas
+    distancia_tp = max(atr * 0.3, min_tp_forzado, stops_level_val)
+
+    # 🔒 Verificar que TP sea mayor que spread + margen mínimo
+    spread_minimo = spread + min_tp_forzado
+    if distancia_tp < spread_minimo:
+        distancia_tp = spread_minimo
+
+    # 📏 Limitar la distancia TP a un máximo de 10 pips REALES según el point
+    max_tp_valor = 10 * symbol_info.point  # 10 pips en valor del precio real
+    if distancia_tp > max_tp_valor:
+        distancia_tp = max_tp_valor
+
+    # Asignar TP según la dirección de la operación
+    if direccion == "📈 SUBE":
+        tp = precio_actual + distancia_tp
+    elif direccion == "📉 BAJA":
+        tp = precio_actual - distancia_tp
+    else:
+        logging.warning(f"⚠️ Dirección desconocida '{direccion}' para {simbolo}. Se usará TP sin dirección.")
+        tp = precio_actual + distancia_tp  # Default a compra
+
+    return tp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def predecir_todos_los_simbolos(modelo, dfs, simbolos, scaler, timeframe, capital_assigned, risk_per_trade=0.5):
+    """
+    Realiza predicciones en paralelo para todos los símbolos, ejecuta órdenes y evalúa resultados después de 5 segundos.
+    """
+    resultados_globales = {}
+    direcciones_trade = {}
+
+    def procesar_simbolo(simbolo):
+        try:
+            if simbolo not in dfs or dfs[simbolo].empty:
+                logging.warning(f"⚠️ No hay datos suficientes para {simbolo}.")
+                return simbolo, None, None, None
+
+            if len(dfs[simbolo]) < 50:
+                logging.warning(f"⚠️ No hay suficientes datos históricos para {simbolo} (mínimo 50 filas).")
+                return simbolo, None, None, None
+
+            columnas_esperadas = ['precio', 'volumen', 'spread', 'volatilidad']
+            for col in columnas_esperadas:
+                if col not in dfs[simbolo].columns:
+                    logging.error(f"❌ Faltan columnas esperadas en {simbolo}. Requiere: {columnas_esperadas}")
+                    return simbolo, None, None, None
+
+            tick_info = mt5.symbol_info_tick(simbolo)
+            if tick_info and isinstance(tick_info.bid, (int, float)):
+                precio_actual = float(tick_info.bid)
+                logging.info(f"✔ Precio inicial obtenido de MT5 ({simbolo}): {precio_actual:,.5f}")
+            else:
+                logging.error(f"❌ No se pudo obtener un precio inicial válido para {simbolo}.")
+                return simbolo, None, None, None
+
+            recent_data = dfs[simbolo].tail(50).values
+
+            if recent_data.shape != (50, 27):
+                logging.error(f"❌ Forma incorrecta para el modelo en {simbolo}. Esperado (50, 27), obtenido {recent_data.shape}.")
+                return simbolo, None, None, None
+
+            entrada = recent_data.reshape(1, 50, 27)
+
+            prediccion_normalizada = modelo.predict(entrada, verbose=0)[0][0]
+
+            if hasattr(scaler, "min_") and hasattr(scaler, "scale_"):
+                prediccion_real = scaler.inverse_transform(np.array([[prediccion_normalizada]]))[0][0]
+            else:
+                logging.error(f"⚠️ El scaler no ha sido ajustado antes de hacer inverse_transform en {simbolo}.")
+                prediccion_real = prediccion_normalizada
+
+            if prediccion_real > precio_actual:
+                direccion = "📈 SUBE"
+            elif prediccion_real < precio_actual:
+                direccion = "📉 BAJA"
+            else:
+                direccion = "🟰 SIN CAMBIO"
+
+            objetivo_tp = calcular_tp(precio_actual, simbolo, timeframe, direccion)
+            if direccion == "🟰 SIN CAMBIO":
+                objetivo_tp = precio_actual
+
+            direcciones_trade[simbolo] = (direccion, objetivo_tp, entrada.flatten().tolist())
+            return simbolo, precio_actual, direccion, objetivo_tp
+
+        except Exception as e:
+            logging.warning(f"⚠️ Error al procesar {simbolo}: {str(e)}")
+            return simbolo, None, None, None
+
+    with ThreadPoolExecutor(max_workers=len(simbolos)) as executor:
+        futuros = {executor.submit(procesar_simbolo, simbolo): simbolo for simbolo in simbolos}
+        for futuro in futuros:
+            simbolo, precio_actual, direccion, precio_objetivo = futuro.result()
+            if precio_actual is not None:
+                logging.info(f"{simbolo} - Precio actual: {precio_actual:,.5f}, Predicción: {direccion} (Objetivo TP: {precio_objetivo:,.5f})")
+                resultados_globales[simbolo] = (precio_actual, direccion, precio_objetivo)
+
+    if not resultados_globales:
+        logging.warning("❌ No se realizaron predicciones debido a falta de datos.")
+        return {}
+
+    modelo_path = getattr(modelo, "filename", None)
+    if not modelo_path or not os.path.exists(modelo_path):
+        modelo_path = "modelo_temporal.h5"
+        try:
+            modelo.save(modelo_path)
+            logging.info(f"💾 Modelo guardado temporalmente en: {modelo_path}")
+        except Exception as e:
+            logging.error(f"❌ No se pudo guardar el modelo temporal en {modelo_path}: {e}")
+            return {}
+
+    if not isinstance(direcciones_trade, dict):
+        logging.error("❌ 'direcciones_trade' no es un diccionario válido.")
+        return {}
+
+    with ThreadPoolExecutor() as executor:
+        executor.submit(execute_trade_multiple, direcciones_trade, capital_assigned, risk_per_trade, modelo, modelo_path)
+
+    
+
+    return direcciones_trade  # 🔁 Asegurado: siempre retorna dict
+
+# Configurar el formato numérico americano
+locale.setlocale(locale.LC_NUMERIC, "en_US.UTF-8")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def formatear_precio(precio):
+    return locale.format_string("%.6f", precio, grouping=True).replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def buscar_por_fecha(archivo, fecha):
+    with open(archivo, "r") as f:
+        lineas = f.readlines()
+    
+    resultados = [linea for linea in lineas if fecha in linea]
+    return resultados
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def main():
+    """Función principal del sistema de trading con entrenamiento y predicción."""
+    import logging
+    import os
+    import time
+    from sklearn.preprocessing import MinMaxScaler
+    import MetaTrader5 as mt5
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+    if pantalla_acceso():
+        print("✅ Contraseña correcta. Continuar con el sistema...")
+
+        resultado = connect_to_mt5()
+        if resultado:
+            print("✅ Conectado a MT5 correctamente.")
+        else:
+            print("❌ No se pudo conectar.")
+            logging.error("No se pudo conectar a MetaTrader 5.")
+            return
+
+        if mostrar_equity_gui():
+            print("✅ Continúa la ejecución del programa")
+        else:
+            print("❌ Distribución cancelada o cerrada la ventana")
+            mt5.shutdown()
+            return
+
+        account_info = mt5.account_info()
+        if account_info is None:
+            logging.error("No se pudo obtener la información de la cuenta.")
+            mt5.shutdown()
+            return
+
+        free_margin = account_info.margin_free
+        logging.info(f"💰 Margen libre disponible: {free_margin}")
+
+        pares_divisas = [
+        "GBPJPYm", "GBPUSDm", "USDZARm", "GBPNZDm", "GBPAUDm",
+        "EURZARm", "AUDUSDm", "NZDJPYm", "AUDJPYm", "GBPCADm"
+    ]
+        timeframe = mt5.TIMEFRAME_M1
+
+        if not calculate_risk_and_capital_distribution(pares_divisas, free_margin):
+            logging.error("❌ No se realizó la distribución del capital.")
+            mt5.shutdown()
+            return
+
+        scaler = MinMaxScaler(feature_range=(0, 1))
+
+        resultado_modelo = cargar_modelo()
+        if isinstance(resultado_modelo, tuple) and len(resultado_modelo) == 3:
+            modelo, modelo_path, modelo_nuevo_creado = resultado_modelo
+        else:
+            modelo, modelo_path = resultado_modelo
+            modelo_nuevo_creado = False
+
+        if modelo is None:
+            print("🟥 No se eligió ni cargar ni crear modelo. Cerrando sistema.")
+            mt5.shutdown()
+            return
+
+        if modelo_nuevo_creado:
+            print("✅ Se eligió CREAR NUEVO MODELO. Entrenando...")
+            logging.info("📊 Entrenando el modelo con datos actualizados de todos los símbolos...")
+
+            df_completo = obtener_datos_mt5(pares_divisas, timeframe, 5000, scaler)
+
+            if df_completo is not None and not df_completo.empty and len(df_completo) > 50:
+                confirmado, X, y = preparar_datos(df_completo)
+
+                if confirmado:
+                    print("✅ Datos preparados correctamente")
+                    split = int(len(X) * 0.8)
+
+                    modelo = entrenar_modelo(modelo, X[:split], y[:split], X[split:], y[split:])
+                    guardar_modelo(modelo)
+
+                    modelo_path = os.path.join(
+                        r"C:\Users\pc\Desktop\PLAN CLASE HILDER\mi_entorno_1", "modelo_entrenado.h5"
+                    )
+                    modelo.save(modelo_path)
+                    print("✅ Entrenamiento completado. Modelo guardado.")
+                else:
+                    print("❌ Preparación de datos cancelada o fallida.")
+                    logging.error("🚫 Preparación de datos cancelada o fallida.")
+                    mt5.shutdown()
+                    return
+            else:
+                logging.error("🚫 No se pudo entrenar el modelo por falta de datos válidos.")
+                mt5.shutdown()
+                return
+        else:
+            print("✅ Se eligió CARGAR MODELO. Saltando entrenamiento...")
+            logging.info("✅ Modelo cargado. Saltando entrenamiento...")
+
+        logging.info("✅ Modelo listo. Iniciando predicciones en tiempo real...")
+
+        columnas_modelo = [
+            'precio', 'volumen', 'spread', 'volatilidad',
+            'slope_3', 'ema_3', 'ema_8', 'ema_diff',
+            'momentum_n', 'direccion_prev', 'volumen_tick_n',
+            'tick_up', 'tick_down', 'tick_imbalance_n',
+            'micro_tendencia_3t', 'aceleracion_n',
+            'spread_movil', 'cambio_spread_n',
+            'max_local', 'min_local', 'dist_max', 'dist_min', 'proximidad_pivote',
+            'candle_body_size_n', 'tiempo_desde_ultimo_extremo',
+            'hora_normalizada', 'zscore_volatilidad'
+        ]
+
+        while True:
+            logging.info("\n" + "=" * 50)
+            logging.info("🔍 Iniciando predicciones para todos los símbolos...")
+
+            dfs = {}
+            for simbolo in pares_divisas:
+                df = obtener_datos_mt5([simbolo], timeframe, 500, scaler)
+                if df is not None and not df.empty:
+                    if all(col in df.columns for col in columnas_modelo):
+                        dfs[simbolo] = df
+                    else:
+                        logging.warning(f"⚠️ {simbolo} no tiene todas las columnas requeridas del modelo ({len(columnas_modelo)} variables).")
+                else:
+                    logging.warning(f"⚠️ No se pudo obtener datos válidos para {simbolo}")
+
+            if dfs:
+                direcciones_trade = predecir_todos_los_simbolos(
+                    modelo, dfs, list(dfs.keys()), scaler, timeframe, free_margin
+                )
+
+                if not modelo_path or not os.path.exists(modelo_path):
+                    logging.warning("⚠️ Ruta del modelo inválida. Se intentará recargar desde GUI...")
+                    modelo, modelo_path = cargar_modelo()[:2]
+
+                risk_per_trade = 1  # Porcentaje fijo, ajustable
+                execute_trade_multiple(
+                    direcciones_trade, free_margin, risk_per_trade, modelo, modelo_path
+                )
+
+                equity = get_account_equity()
+                if equity is None:
+                    logging.error("No se pudo actualizar el equity de la cuenta. Terminando ejecución.")
+                    break
+                logging.info(f"📈 Equity actualizado: {equity}")
+
+            time.sleep(1)
+
+    else:
+        print("❌ Acceso cancelado o contraseña incorrecta.")
+
+
+if __name__ == "__main__":
+    main()
