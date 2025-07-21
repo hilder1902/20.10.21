@@ -1,0 +1,874 @@
+# 📁 Módulos del sistema
+import time
+import signal
+import getpass
+from datetime import datetime, timedelta
+import threading
+import sys
+import os
+import pickle
+
+# 📊 Bibliotecas científicas y de análisis
+import numpy as np
+import pandas as pd
+
+# 💹 MetaTrader 5
+import MetaTrader5 as mt5
+
+# 🧠 Interfaz gráfica (Tkinter)
+import tkinter as tk
+from tkinter import messagebox
+
+# 📝 Logging
+import logging
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Configuración de logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+def cerrar_conexion(sig, frame):
+    """Manejador de la señal Ctrl + C para cerrar la conexión correctamente."""
+    logging.info("\nCerrando conexión con MT5...")
+    mt5.shutdown()  # Cerrar MT5 de manera segura
+    logging.info("Conexión cerrada.")
+    exit(0)  # Salir del programa
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Registrar el manejador de la señal Ctrl + C
+signal.signal(signal.SIGINT, cerrar_conexion)
+
+
+def connect_to_mt5():   
+    """Solicita credenciales al usuario mediante GUI y establece conexión con MetaTrader 5."""
+    
+
+    resultado = {"conexion_exitosa": False}  # variable mutable para comunicar resultado
+
+    # ======= Crear ventana raíz oculta ======= #
+    root = tk.Tk()
+    root.withdraw()  # Oculta la ventana principal para evitar que aparezca la ventana blanca
+
+    # ======= Crear Toplevel maximizado ======= #
+    ventana = tk.Toplevel()
+    ventana.title("DEEPTRADE")
+    ventana.configure(bg="#ffffff")
+    ventana.state("zoomed")  # Maximizamos la ventana al iniciar
+    ventana.grab_set()       # Modal
+    ventana.focus_force()    # Forzamos el foco
+    ventana.update()         # Asegura que se renderice antes de colocar los elementos
+
+    def iniciar_conexion(event=None):
+        try:
+            cuenta = int(entry_cuenta.get())
+            servidor = entry_servidor.get()
+            contraseña = entry_password.get()
+        except ValueError:
+            logging.error("El número de cuenta debe ser un número entero.")
+            messagebox.showerror("Error", "El número de cuenta debe ser un número entero.")
+            return
+
+        if not mt5.initialize():
+            logging.error("Error al inicializar MT5: %s", mt5.last_error())
+            messagebox.showerror("Error", f"Error al inicializar MT5: {mt5.last_error()}")
+            return
+
+        if not mt5.login(cuenta, password=contraseña, server=servidor):
+            logging.error("Error al iniciar sesión: %s", mt5.last_error())
+            mt5.shutdown()
+            messagebox.showerror("Error", f"Error al iniciar sesión: {mt5.last_error()}")
+            return
+
+        logging.info("Conexión exitosa a MT5.")
+        resultado["conexion_exitosa"] = True
+        messagebox.showinfo("Éxito", "Conexión exitosa a MT5.")  # Espera confirmación del usuario
+        ventana.destroy()
+
+    def agregar_menu_contextual(widget):
+        menu = tk.Menu(widget, tearoff=0)
+        menu.add_command(label="Copiar", command=lambda: widget.event_generate("<<Copy>>"))
+        menu.add_command(label="Pegar", command=lambda: widget.event_generate("<<Paste>>"))
+
+        def mostrar_menu(event):
+            menu.tk_popup(event.x_root, event.y_root)
+        widget.bind("<Button-3>", mostrar_menu)
+
+    contenedor = tk.Frame(ventana, bg="#ffffff")
+    contenedor.place(relx=0.5, rely=0.5, anchor="center")
+
+    tk.Label(contenedor, text="DEEPTRADE", font=("Arial", 20, "bold"), bg="#ffffff", fg="#004c99").pack(pady=(10, 30))
+
+    global entry_cuenta
+    tk.Label(contenedor, text="Número de cuenta", font=("Arial", 12), bg="#ffffff", fg="#000000").pack()
+    entry_cuenta = tk.Entry(contenedor, width=40, font=("Arial", 12), relief="solid", bd=1, bg="#f0f0f0", fg="#000000")
+    entry_cuenta.pack(pady=(0, 15), ipady=5)
+    agregar_menu_contextual(entry_cuenta)
+
+    global entry_servidor
+    tk.Label(contenedor, text="Servidor", font=("Arial", 12), bg="#ffffff", fg="#000000").pack()
+    entry_servidor = tk.Entry(contenedor, width=40, font=("Arial", 12), relief="solid", bd=1, bg="#f0f0f0", fg="#000000")
+    entry_servidor.pack(pady=(0, 15), ipady=5)
+    agregar_menu_contextual(entry_servidor)
+
+    global entry_password
+    tk.Label(contenedor, text="Contraseña", font=("Arial", 12), bg="#ffffff", fg="#000000").pack()
+
+    frame_password = tk.Frame(contenedor, bg="#ffffff")
+    frame_password.pack(pady=(0, 25))
+
+    entry_password = tk.Entry(frame_password, show="*", width=34, font=("Arial", 12),
+                              relief="solid", bd=1, bg="#f0f0f0", fg="#000000")
+    entry_password.pack(side="left", ipady=5)
+    agregar_menu_contextual(entry_password)
+
+    def toggle_password():
+        if entry_password.cget("show") == "":
+            entry_password.config(show="*")
+            btn_ver.config(text="👁")
+        else:
+            entry_password.config(show="")
+            btn_ver.config(text="👁")
+
+    btn_ver = tk.Button(frame_password, text="👁", font=("Arial", 10),
+                        bg="#ffffff", fg="#666666", bd=0,
+                        command=toggle_password, cursor="hand2",
+                        activebackground="#f0f0f0", activeforeground="#000000")
+    btn_ver.pack(side="left", padx=(5, 0))
+
+    # ======= VINCULAR ENTER A TODAS LAS ENTRADAS Y NO SOLO CONTRASEÑA ======= #
+    entry_cuenta.bind("<Return>", iniciar_conexion)
+    entry_servidor.bind("<Return>", iniciar_conexion)
+    entry_password.bind("<Return>", iniciar_conexion)
+
+    # ======= BOTÓN DE CONEXIÓN (NO SE TOCA SU LÓGICA) ======= #
+    btn_conectar = tk.Button(
+        contenedor,
+        text="Conectar",
+        command=iniciar_conexion,
+        bg="#28a745",
+        fg="#ffffff",
+        activebackground="#1c7c3a",
+        activeforeground="#ffffff",
+        padx=20,
+        pady=10,
+        font=("Arial", 11, "bold"),
+        relief="flat",
+        cursor="hand2"
+    )
+    btn_conectar.pack()
+
+    def on_enter(e):
+        btn_conectar.config(bg="#1c7c3a")
+
+    def on_leave(e):
+        btn_conectar.config(bg="#28a745")
+
+    btn_conectar.bind("<Enter>", on_enter)
+    btn_conectar.bind("<Leave>", on_leave)
+
+    ventana.wait_window()
+    return resultado["conexion_exitosa"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+logging.basicConfig(level=logging.ERROR)
+
+
+def get_account_equity():
+    """
+    Obtiene el balance y el margen libre de la cuenta.
+    """
+    account_info = mt5.account_info()
+    if account_info is None:
+        print("No se pudo obtener la información de la cuenta.")
+        return None
+
+    balance = account_info.balance
+    free_margin = account_info.margin_free
+
+    print(f"Balance: {balance}, Margen libre: {free_margin}")
+    return balance, free_margin
+
+
+def mostrar_equity_gui(parent=None):
+    """
+    Muestra una ventana Toplevel con el balance y margen libre.
+    Devuelve True si se presiona "DISTRIBUIR".
+    """
+    resultado = {"continuar": False}
+
+    # Si no se pasa parent, crear ventana raíz oculta
+    if parent is None:
+        parent = tk.Tk()
+        parent.withdraw()
+
+    # Crear ventana secundaria
+    ventana_equity = tk.Toplevel(parent)
+    ventana_equity.title("💼 DEEPTRADE - Equity de la Cuenta")
+    ventana_equity.state("zoomed")  # MAXIMIZAR VENTANA
+    ventana_equity.configure(bg="#ffffff")  # Fondo blanco
+
+    # Frame contenedor central
+    contenedor = tk.Frame(ventana_equity, bg="#ffffff")
+    contenedor.place(relx=0.5, rely=0.5, anchor="center")
+
+    # Título con emoji 📊 en color gris oscuro
+    label_titulo = tk.Label(
+        contenedor,
+        text="📊 Información de la cuenta MT5",
+        font=("Helvetica", 18, "bold"),
+        bg="#ffffff",
+        fg="#333333"
+    )
+    label_titulo.pack(pady=10)
+
+    # Etiquetas balance y margen
+    tk.Label(contenedor, text="Balance:", font=("Helvetica", 14), bg="#ffffff", fg="#000000").pack()
+    balance_label = tk.Label(contenedor, text="$0.00", font=("Helvetica", 16, "bold"), fg="#0000ff", bg="#ffffff")
+    balance_label.pack(pady=5)
+
+    tk.Label(contenedor, text="Margen libre disponible:", font=("Helvetica", 14), bg="#ffffff", fg="#000000").pack()
+    margen_label = tk.Label(contenedor, text="$0.00", font=("Helvetica", 16, "bold"), fg="#008000", bg="#ffffff")
+    margen_label.pack(pady=5)
+
+    # Función para actualizar valores
+    def actualizar():
+        equity = get_account_equity()
+        if equity:
+            balance, free_margin = equity
+            balance_label.config(text=f"${balance:,.2f}")
+            margen_label.config(text=f"${free_margin:,.2f}")
+        else:
+            messagebox.showerror("Error", "No se pudo obtener la información de la cuenta MT5.")
+
+    # Función cuando se presiona DISTRIBUIR
+    def distribuir_capital():
+        equity = get_account_equity()
+        if equity:
+            _, free_margin = equity
+            capital_x_symbol = {
+                "XAUUSD": free_margin * 0.33,
+                "BTCUSD": free_margin * 0.33,
+                "EURUSD": free_margin * 0.34
+            }
+            for symbol, amount in capital_x_symbol.items():
+                print(f"{symbol}: ${amount:,.2f}")
+            resultado["continuar"] = True
+            ventana_equity.destroy()
+        else:
+            messagebox.showerror("Error", "No se pudo calcular la distribución.")
+
+    # Botón de actualizar
+    btn_actualizar = tk.Button(
+        contenedor,
+        text="🔄 Actualizar Equity",
+        bg="#007acc",
+        fg="#ffffff",
+        activebackground="#005f99",
+        activeforeground="#ffffff",
+        font=("Helvetica", 12, "bold"),
+        padx=20,
+        pady=10,
+        relief="flat",
+        cursor="hand2",
+        command=actualizar
+    )
+    btn_actualizar.pack(pady=10)
+    btn_actualizar.bind("<Enter>", lambda e: btn_actualizar.config(bg="#005f99"))
+    btn_actualizar.bind("<Leave>", lambda e: btn_actualizar.config(bg="#007acc"))
+
+    # Botón de distribuir
+    btn_distribuir = tk.Button(
+        contenedor,
+        text="📤 DISTRIBUIR",
+        bg="#28a745",
+        fg="#ffffff",
+        activebackground="#1e7e34",
+        activeforeground="#ffffff",
+        font=("Helvetica", 14, "bold"),
+        padx=20,
+        pady=10,
+        relief="flat",
+        cursor="hand2",
+        command=distribuir_capital
+    )
+    btn_distribuir.pack(pady=10)
+    btn_distribuir.bind("<Enter>", lambda e: btn_distribuir.config(bg="#1e7e34"))
+    btn_distribuir.bind("<Leave>", lambda e: btn_distribuir.config(bg="#28a745"))
+
+    # Inicializa con datos reales
+    actualizar()
+
+    # Esperar a que se cierre la ventana antes de retornar
+    ventana_equity.grab_set()
+    ventana_equity.wait_window()
+
+    return resultado["continuar"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def calculate_risk_and_capital_distribution(symbols, free_margin):  
+    """
+    Calcula el riesgo y distribuye el capital basado en el margen libre y el porcentaje definido por el usuario.
+
+    Args:
+        symbols (list): Lista de símbolos financieros.
+        free_margin (float): Margen libre de la cuenta.
+
+    Returns:
+        dict: Un diccionario con la distribución de capital para cada símbolo, o None si se cancela.
+    """
+    if free_margin is None or free_margin <= 0:
+        logging.error("El margen libre no es válido o es insuficiente.")
+        return None
+
+    # ✅ Lista fija de pares que se usarán dentro de la ventana
+    symbols = [
+        "GBPJPYm", "GBPUSDm", "USDZARm", "GBPNZDm", "GBPAUDm",
+        "EURZARm", "AUDUSDm", "NZDJPYm", "AUDJPYm", "GBPCADm"
+    ]
+
+    def mostrar_distribucion_gui():
+        ventana = tk.Toplevel()
+        ventana.title("📊 Distribución de Capital")
+        ventana.configure(bg="white")
+        ventana.state("zoomed")  # ✅ Maximizar ventana
+
+        # ✅ Captura de cierre con X
+        def confirmar_salida():
+            if messagebox.askokcancel("SALIR DEL PROGRAMA", "¿Desea cerrar el programa?"):
+                ventana.destroy()
+                sys.exit()
+
+        ventana.protocol("WM_DELETE_WINDOW", confirmar_salida)
+
+        contenedor_central = tk.Frame(ventana, bg="white")
+        contenedor_central.place(relx=0.5, rely=0.5, anchor="center")  # ✅ Centrado total
+
+        tk.Label(contenedor_central, text="ASIGNAR % DEL MARGEN LIBRE", 
+                 font=("Segoe UI", 18, "bold"), fg="black", bg="white").pack(pady=(10, 10))
+
+        porcentaje_var = tk.IntVar(value=0)
+
+        def aumentar():
+            if porcentaje_var.get() < 100:
+                porcentaje_var.set(porcentaje_var.get() + 1)
+
+        def disminuir():
+            if porcentaje_var.get() > 0:
+                porcentaje_var.set(porcentaje_var.get() - 1)
+
+        botones_frame = tk.Frame(contenedor_central, bg="white")
+        botones_frame.pack(pady=5)
+
+        def ripple_effect(button, color="#444444", duration=100):
+            original = button.cget("bg")
+            button.configure(bg=color)
+            button.after(duration, lambda: button.configure(bg=original))
+
+        btn_menos = tk.Button(botones_frame, text="–", command=lambda: [ripple_effect(btn_menos), disminuir()],
+                              font=("Segoe UI", 14, "bold"), bg="white", fg="#111111",
+                              activebackground="white", activeforeground="black",
+                              width=3, relief="flat", cursor="hand2")
+        btn_menos.pack(side="left", padx=10)
+
+        label_porcentaje = tk.Label(botones_frame, textvariable=porcentaje_var,
+                                    font=("Segoe UI", 14, "bold"), bg="white", width=5)
+        label_porcentaje.pack(side="left")
+
+        btn_mas = tk.Button(botones_frame, text="+", command=lambda: [ripple_effect(btn_mas), aumentar()],
+                            font=("Segoe UI", 14, "bold"), bg="white", fg="#111111",
+                            activebackground="white", activeforeground="black",
+                            width=3, relief="flat", cursor="hand2")
+        btn_mas.pack(side="left", padx=10)
+
+        resultado_frame = tk.Frame(contenedor_central, bg="white")
+        resultado_frame.pack(pady=15)
+
+        ventana.capital_distribution = None
+        ventana.resultado_final = False
+
+        def confirmar():
+            for widget in resultado_frame.winfo_children():
+                widget.destroy()
+
+            risk_percentage = porcentaje_var.get()
+            if not 0 <= risk_percentage <= 100:
+                logging.error("El porcentaje debe estar entre 0 y 100.")
+                messagebox.showerror("Error", "El porcentaje debe estar entre 0 y 100.")
+                return
+
+            number_of_symbols = len(symbols)
+            if number_of_symbols == 0:
+                logging.error("La lista de símbolos está vacía.")
+                messagebox.showerror("Error", "La lista de símbolos está vacía.")
+                return
+
+            capital_per_symbol = (free_margin * risk_percentage / 100) / number_of_symbols
+            logging.info(f"El capital asignado a cada símbolo será: {capital_per_symbol:.2f}")
+
+            capital_distribution = {symbol: capital_per_symbol for symbol in symbols}
+
+            fila = 0
+            columna = 0
+            for symbol in symbols:
+                capital = capital_distribution[symbol]
+                entry = tk.Entry(resultado_frame, width=25, font=("Segoe UI", 10), justify="center",
+                                 relief="solid", bg="#f4f4f4")
+                entry.insert(0, f"{symbol}: ${capital:.2f}")
+                entry.config(state="readonly")
+                entry.grid(row=fila, column=columna, padx=5, pady=5)
+
+                columna += 1
+                if columna >= 2:
+                    columna = 0
+                    fila += 1
+
+            ventana.capital_distribution = capital_distribution
+            btn_confirmar.pack_forget()  # ✅ Ocultar botón ACEPTAR después de usar
+            btn_continuar.pack(pady=(20, 10))  # ✅ Mostrar botón CONTINUAR
+
+        btn_confirmar = tk.Button(contenedor_central, text="ACEPTAR", 
+                                  command=lambda: [ripple_effect(btn_confirmar, "#222222"), confirmar()],
+                                  bg="white", fg="#111111",
+                                  activebackground="white", activeforeground="black",
+                                  font=("Segoe UI", 11, "bold"), padx=20, pady=5,
+                                  relief="flat", cursor="hand2")
+        btn_confirmar.pack(pady=(20, 0))
+
+        def continuar():
+            ripple_effect(btn_continuar, "#222222")
+            ventana.resultado_final = True
+            ventana.destroy()
+
+        btn_continuar = tk.Button(contenedor_central, text="CONTINUAR", bg="white", fg="#111111",
+                                  activebackground="white", activeforeground="black",
+                                  font=("Segoe UI", 11, "bold"), padx=20, pady=5,
+                                  relief="flat", cursor="hand2",
+                                  command=continuar)
+        btn_continuar.pack_forget()
+
+        ventana.wait_window()
+        return ventana.resultado_final
+
+    resultado = mostrar_distribucion_gui()
+    if resultado:
+        return True
+    else:
+        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+def calcular_atr(simbolo, timeframe=mt5.TIMEFRAME_M1, periodos=14):
+    """
+    Calcula el Average True Range (ATR) para un símbolo dado.
+
+    Parámetros:
+    - simbolo (str): Símbolo del activo en MT5.
+    - timeframe (int): Timeframe de los datos (por defecto M1).
+    - periodos (int): Número de períodos para calcular el ATR.
+
+    Retorna:
+    - float: Valor del ATR.
+    """
+    try:
+        rates = mt5.copy_rates_from_pos(simbolo, timeframe, 0, periodos + 1)
+        if rates is None or len(rates) < periodos + 1:
+            raise ValueError(f"No se pudieron obtener suficientes datos para ATR ({simbolo})")
+
+        df = pd.DataFrame(rates)
+        df["high-low"] = df["high"] - df["low"]
+        df["high-close"] = abs(df["high"] - df["close"].shift(1))
+        df["low-close"] = abs(df["low"] - df["close"].shift(1))
+
+        df["true_range"] = df[["high-low", "high-close", "low-close"]].max(axis=1)
+        atr = df["true_range"].rolling(window=periodos).mean().iloc[-1]
+
+        return atr
+
+    except Exception as e:
+        logging.error(f"❌ Error al calcular ATR para {simbolo}: {str(e)}")
+        return None
+
+def calcular_tp(precio_actual, simbolo, timeframe):
+    """
+    Calcula el Take Profit (TP) dinámicamente usando el ATR del símbolo en el timeframe dado.
+    """
+    atr = calcular_atr(simbolo, timeframe)  # Obtener la volatilidad media del mercado
+    tp = precio_actual + (atr * 0.5)  # TP ajustado a la mitad del ATR
+    return tp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import locale 
+# ⚡ Buffer para almacenar errores pasados
+error_memoria = []
+# Establecer el sistema decimal americano
+locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
+def execute_trade_multiple(direcciones_trade, capital_assigned, risk_per_trade, modelo, modelo_path):  
+    from datetime import datetime, timedelta
+    import pytz
+    import os
+    import locale
+    import logging
+    import MetaTrader5 as mt5
+    import numpy as np
+    from time import sleep, time
+    import random
+    import threading
+    import uuid
+
+    locale.setlocale(locale.LC_ALL, 'C')
+
+    if not isinstance(direcciones_trade, dict):
+        raise ValueError("❌ El parámetro 'direcciones_trade' debe ser un diccionario.")
+
+    if not modelo_path or not os.path.exists(modelo_path):
+        logging.warning("🔺 La ruta del modelo no es válida o no existe. Verifica el parámetro 'modelo_path'.")
+        return
+
+    if not mt5.initialize():
+        logging.error("❌ No se pudo inicializar MetaTrader 5.")
+        return
+
+    def enviar_orden_robusta(request, reintentos=3, pausa=0.5):
+        for intento in range(reintentos):
+            result = mt5.order_send(request)
+            if result is not None:
+                return result
+            logging.warning(f"⚠️ Reintentando envío de orden (intento {intento+1}/{reintentos})...")
+            sleep(pausa)
+        return None
+
+    def enviar_y_cerrar_operacion(simbolo, direccion, precio_operacion, lot_size, i):
+        try:
+            action_type = mt5.ORDER_TYPE_BUY if direccion == "📈 SUBE" else mt5.ORDER_TYPE_SELL
+            sleep(random.uniform(0.15, 0.25))  # 🧍 Delay previo simulando humano
+            comentario_unico = f"Scalp{i}_{int(time())}"  # Seguro y corto (<32 caracteres)
+
+            logging.info(f"🛒 [{i+1}/10] Enviando orden {direccion} en {simbolo} a {precio_operacion}")
+            result = enviar_orden_robusta({
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": simbolo,
+                "volume": lot_size,
+                "type": action_type,
+                "price": precio_operacion,
+                "tp": 0.0,
+                "deviation": 0,
+                "magic": 123456,
+                "comment": comentario_unico
+            })
+
+            if result is None:
+                logging.error(f"❌ No se recibió respuesta de MT5 en orden {i+1} de {simbolo}. Posible desconexión o símbolo inactivo.")
+                return
+
+            if result.retcode != mt5.TRADE_RETCODE_DONE:
+                logging.warning(f"⚠️ Fallo orden {i+1} en {simbolo}: Código {result.retcode}")
+                return
+
+            ticket = result.order
+            precio_ejecutado = result.price
+            logging.info(f"✅ Orden {i+1} ejecutada en {simbolo} con ticket {ticket} | Precio ejecutado: {precio_ejecutado:.5f}")
+
+            sleep(random.uniform(0.1, 0.2))  # Esperar antes de modificar TP
+
+            distancia_tp = round(random.uniform(0.098, 0.102), 5)
+            tp_final = precio_ejecutado + distancia_tp if direccion == "📈 SUBE" else precio_ejecutado - distancia_tp
+
+            if (direccion == "📈 SUBE" and tp_final <= precio_ejecutado) or \
+               (direccion == "📉 BAJA" and tp_final >= precio_ejecutado):
+                logging.error(f"❌ TP incoherente detectado en {simbolo}. Corrigiendo...")
+                tp_final = precio_ejecutado + abs(distancia_tp) if direccion == "📈 SUBE" else precio_ejecutado - abs(distancia_tp)
+
+            modify_result = mt5.order_send({
+                "action": mt5.TRADE_ACTION_SLTP,
+                "position": ticket,
+                "sl": 0.0,
+                "tp": tp_final,
+                "symbol": simbolo,
+                "magic": 123456,
+                "comment": "Ajuste TP post ejecución"
+            })
+
+            if modify_result is None or modify_result.retcode != mt5.TRADE_RETCODE_DONE:
+                logging.error(f"❌ No se pudo modificar TP en {simbolo}.")
+            else:
+                logging.info(f"🛠️ TP ajustado correctamente en {simbolo} a {tp_final:.5f} | ticket {ticket}")
+
+            tiempo_inicio = time()
+            cerrada = False
+
+            while time() - tiempo_inicio < 60:
+                posiciones = mt5.positions_get(ticket=ticket)
+                if posiciones:
+                    tiempo_transcurrido = time() - tiempo_inicio
+                    if tiempo_transcurrido < 4.5:
+                        sleep(4.5 - tiempo_transcurrido)
+                    profit = posiciones[0].profit
+                    if profit >= 0.10:
+                        cierre_tipo = mt5.ORDER_TYPE_SELL if action_type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
+                        cierre = mt5.order_send({
+                            "action": mt5.TRADE_ACTION_DEAL,
+                            "symbol": simbolo,
+                            "volume": lot_size,
+                            "type": cierre_tipo,
+                            "position": posiciones[0].ticket,
+                            "price": mt5.symbol_info_tick(simbolo).bid if cierre_tipo == mt5.ORDER_TYPE_SELL else mt5.symbol_info_tick(simbolo).ask,
+                            "deviation": 0,
+                            "magic": 123456,
+                            "comment": "Cierre automático +0.10"
+                        })
+                        if cierre and cierre.retcode == mt5.TRADE_RETCODE_DONE:
+                            tiempo_abierto = time() - tiempo_inicio
+                            logging.info(f"💰 Cierre anticipado por ganancia >= +0.10 USD en {simbolo}. Ticket: {ticket} | Ganancia: {profit:.2f} USD | Tiempo abierto: {tiempo_abierto:.0f} segundos")
+                        cerrada = True
+                        break
+                else:
+                    historial = mt5.history_deals_get(datetime.now() - timedelta(minutes=5), datetime.now())
+                    if historial:
+                        cierres = [h for h in historial if h.position_id == ticket]
+                        if cierres:
+                            ultimo_cierre = cierres[-1]
+                            tiempo_abierto = time() - tiempo_inicio
+                            if ultimo_cierre.profit < 0:
+                                logging.info(f"😡 Cierre interno detectado por pérdida <= 0.00 USD en {simbolo}. | Ticket: {ticket} | Pérdida: {ultimo_cierre.profit:.2f} USD | Tiempo abierto: {tiempo_abierto:.0f} segundos")
+                            else:
+                                logging.info(f"🚫 Cierre externo detectado por perdida <= 0.00 USD en {simbolo}. | Ticket: {ticket} | perdida : {ultimo_cierre.profit:.2f} USD | Tiempo abierto: {tiempo_abierto:.0f} segundos")
+                    cerrada = True
+                    break
+
+                sleep(0.5)
+
+            if not cerrada:
+                posiciones = mt5.positions_get(ticket=ticket)
+                if posiciones:
+                    profit_final = posiciones[0].profit
+                    cierre_tipo = mt5.ORDER_TYPE_SELL if action_type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
+                    cierre = mt5.order_send({
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": simbolo,
+                        "volume": lot_size,
+                        "type": cierre_tipo,
+                        "position": posiciones[0].ticket,
+                        "price": mt5.symbol_info_tick(simbolo).bid if cierre_tipo == mt5.ORDER_TYPE_SELL else mt5.symbol_info_tick(simbolo).ask,
+                        "deviation": 0,
+                        "magic": 123456,
+                        "comment": "Cierre automático 60s"
+                    })
+                    if cierre and cierre.retcode == mt5.TRADE_RETCODE_DONE:
+                        tiempo_abierto = time() - tiempo_inicio
+                        logging.info(f"🕒 Operación cerrada después de 60s en {simbolo}|Ticket: {ticket} | Pérdida: {profit_final:.2f} USD")
+        except Exception as e:
+            logging.error(f"❌ Excepción en operación {i+1} de {simbolo}: {e}")
+
+    def procesar_simbolo(simbolo, trade_data):
+        try:
+            direccion_base, _ = trade_data[0], trade_data[1]
+            operaciones = []
+            for i in range(10):
+                direccion = direccion_base
+                symbol_info = mt5.symbol_info(simbolo)
+                tick = mt5.symbol_info_tick(simbolo)
+                if not symbol_info or not tick:
+                    logging.warning(f"❌ No se pudo obtener info de {simbolo}.")
+                    return
+                mt5.symbol_select(simbolo, True)
+                spread = tick.ask - tick.bid
+                precio_actual = tick.ask if direccion == "📈 SUBE" else tick.bid
+                variacion = random.uniform(-spread / 10, spread / 10)
+                precio_operacion = round(precio_actual + variacion, symbol_info.digits)
+                symbol_capital = capital_assigned.get(simbolo, 0)
+                risk_amount = symbol_capital * (risk_per_trade / 100)
+                lot_size = risk_amount / precio_operacion
+                lot_size = max(symbol_info.volume_min,
+                               min(round(lot_size / symbol_info.volume_step) * symbol_info.volume_step, symbol_info.volume_max))
+                hilo_op = threading.Thread(
+                    target=enviar_y_cerrar_operacion,
+                    args=(simbolo, direccion, precio_operacion, lot_size, i)
+                )
+                operaciones.append(hilo_op)
+                hilo_op.start()
+                sleep(random.uniform(0.15, 0.35))  # Desfase entre hilos
+
+            for op in operaciones:
+                op.join()
+
+        except Exception as e:
+            logging.error(f"❌ Excepción en {simbolo}: {e}")
+
+    for simbolo, datos in direcciones_trade.items():
+        procesar_simbolo(simbolo, datos)
+        print("\n" * 10 + "=" * 120)
+
+
+
+
+
+
+   
