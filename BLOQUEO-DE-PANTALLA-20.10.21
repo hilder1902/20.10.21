@@ -1,0 +1,438 @@
+# 🧰 Módulos del sistema
+import os
+import sys
+import time
+import pickle
+
+# 🖼️ Interfaz gráfica Tkinter
+import tkinter as tk
+from tkinter import messagebox
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def pantalla_acceso():
+    
+
+    acceso_concedido = False  # Bandera para saber si la contraseña fue correcta
+
+    #======== PALETA DE COLORES ========#
+    blanco = "#ffffff"
+    gris_claro = "#f0f0f0"
+    gris_medio = "#cccccc"
+    gris_oscuro = "#666666"
+    verde = "#28a745"
+    verde_claro = "#8ef5a0"
+    verde_oscuro = "#1c7c3a"
+    azul = "#007bff"
+    azul_claro = "#71c6ff"
+    azul_oscuro = "#004c99"
+    negro = "#000000"
+    rojo = "#dc3545"
+    rojo_hover = "#ff5c5c"
+
+    #======== CIERRE DEL PROGRAMA ========#
+    def salir_programa():
+        root.destroy()
+        sys.exit()
+
+    #======== EFECTO DE VIBRACIÓN (SHAKE) ========#
+    def vibrar():
+        x = root.winfo_x()
+        y = root.winfo_y()
+        for _ in range(3):
+            root.geometry(f"+{x+5}+{y}")
+            root.update()
+            time.sleep(0.05)
+            root.geometry(f"+{x-5}+{y}")
+            root.update()
+            time.sleep(0.05)
+        root.geometry(f"+{x}+{y}")
+
+    #======== VERIFICACIÓN DE CONTRASEÑA ========#
+    def verificar_clave():
+        nonlocal acceso_concedido
+        entrada = entry_clave.get()
+
+        if os.path.exists("configuracion_clave.dat"):
+            try:
+                with open("configuracion_clave.dat", "rb") as f:
+                    clave_guardada = pickle.load(f)
+            except Exception as e:
+                print(f"Error al cargar la clave guardada: {e}")
+                messagebox.showerror("Error", "No se pudo leer la clave guardada.")
+                return
+        else:
+            messagebox.showerror("Clave no encontrada", "No existe ninguna clave configurada.")
+            return
+
+        if entrada == clave_guardada:
+            btn_acceder.config(text="🔓 Acceso concedido", bg=verde_oscuro)
+            acceso_concedido = True
+            root.after(1000, root.destroy)
+        else:
+            vibrar()
+            messagebox.showerror("Acceso denegado", "❌ Clave incorrecta.")
+
+    #======== TECLA ENTER PARA ACCEDER ========#
+    def presionar_enter(event):
+        verificar_clave()
+
+    #======== VENTANA: MENÚ DE AJUSTES ========#
+    def abrir_menu_ajustes():
+        ventana_ajustes = tk.Toplevel(root)
+        ventana_ajustes.title("Ajustes")
+        ventana_ajustes.geometry("250x120")
+        ventana_ajustes.resizable(False, False)
+        ventana_ajustes.configure(bg=gris_claro)
+        ventana_ajustes.geometry(f"+{root.winfo_x()+50}+{root.winfo_y()+50}")
+        ventana_ajustes.transient(root)
+        ventana_ajustes.grab_set()
+
+        frame_acciones = tk.Frame(ventana_ajustes, bg=gris_claro)
+        frame_acciones.pack(fill="both", expand=True, padx=10, pady=10)
+
+        tk.Label(frame_acciones, text="CONFIGURACIÓN", font=("Arial", 9, "bold"),
+                 bg=gris_claro, fg=gris_oscuro, anchor="w").pack(fill="x", pady=(10,5))
+
+        #======== BOTÓN CAMBIAR CONTRASEÑA ========#
+        btn_cambiar_clave = tk.Button(frame_acciones, text="Cambiar Contraseña",
+                                      font=("Arial", 10), bg=blanco, fg=azul_oscuro,
+                                      bd=0, anchor="w", relief="flat",
+                                      command=lambda: abrir_cambio_clave(root),
+                                      activebackground=azul_claro, activeforeground=azul_oscuro,
+                                      cursor="hand2")
+        btn_cambiar_clave.pack(fill="x", pady=15)
+
+        def on_hover(event):
+            btn_cambiar_clave.config(bg=gris_medio)
+
+        def on_leave(event):
+            btn_cambiar_clave.config(bg=blanco)
+
+        btn_cambiar_clave.bind("<Enter>", on_hover)
+        btn_cambiar_clave.bind("<Leave>", on_leave)
+
+    #======== MENÚ CONTEXTUAL (CLICK DERECHO) ========#
+    def mostrar_menu_contextual(event):
+        menu_contextual = tk.Menu(root, tearoff=0)
+        menu_contextual.add_command(label="Copiar", command=lambda: root.focus_get().event_generate("<<Copy>>"))
+        menu_contextual.add_command(label="Pegar", command=lambda: root.focus_get().event_generate("<<Paste>>"))
+        menu_contextual.tk_popup(event.x_root, event.y_root)
+
+    #======== VENTANA PRINCIPAL ROOT ========#
+    root = tk.Tk()
+    root.title("Acceso al sistema")
+    root.configure(bg=blanco)
+    root.state("zoomed")
+    root.resizable(True, True)
+    root.protocol("WM_DELETE_WINDOW", salir_programa)
+
+    #======== CONTENEDOR CENTRAL ========#
+    contenedor = tk.Frame(root, bg=blanco)
+    contenedor.place(relx=0.5, rely=0.5, anchor="center")
+
+    #======== TÍTULO PRINCIPAL ========#
+    titulo = tk.Label(contenedor, text="ARKTECHK | DEEPTRADE", font=("Arial", 20, "bold"),
+                      fg=azul_oscuro, bg=blanco)
+    titulo.pack(pady=40)
+
+    #======== CAMPO DE ENTRADA: CONTRASEÑA + OJO ========#
+    frame_entry = tk.Frame(contenedor, bg=blanco)
+    frame_entry.pack(pady=(0, 5))
+
+    entry_clave = tk.Entry(frame_entry, show="*", font=("Arial", 14), width=25,
+                           bg=gris_claro, fg=negro, bd=1, relief="solid")
+    entry_clave.pack(side="left")
+    entry_clave.focus()
+    entry_clave.bind("<Return>", presionar_enter)
+    entry_clave.bind("<Button-3>", mostrar_menu_contextual)
+
+    def toggle_password():
+        if entry_clave.cget("show") == "":
+            entry_clave.config(show="*")
+            btn_ver.config(text="👁")
+        else:
+            entry_clave.config(show="")
+            btn_ver.config(text="👁")
+
+    btn_ver = tk.Button(frame_entry, text="👁", font=("Arial", 10),
+                        bg=blanco, fg=gris_oscuro, bd=0,
+                        command=toggle_password, cursor="hand2",
+                        activebackground=blanco, activeforeground=gris_oscuro)
+    btn_ver.pack(side="left", padx=(5, 0))
+
+    #======== TEXTO: OLVIDASTE LA CONTRASEÑA ========#
+    olvido_txt = tk.Label(contenedor, text="¿Olvidaste la contraseña?", font=("Arial", 9, "italic"),
+                           fg=gris_oscuro, bg=blanco, cursor="hand2")
+    olvido_txt.pack()
+    olvido_txt.bind("<Button-1>", lambda e: abrir_cambio_clave(root))
+    olvido_txt.bind("<Enter>", lambda e: olvido_txt.config(fg=azul_oscuro))
+    olvido_txt.bind("<Leave>", lambda e: olvido_txt.config(fg=gris_oscuro))
+
+    #======== BOTÓN INGRESAR (CANDADO) ========#
+    btn_acceder = tk.Button(contenedor, text="🔒 Ingresar", font=("Arial", 12, "bold"),
+                            bg=rojo, fg=blanco, activebackground=rojo_hover,
+                            activeforeground=blanco, relief="flat", width=20,
+                            command=verificar_clave, cursor="hand2")
+    btn_acceder.pack(pady=15)
+    btn_acceder.bind("<Enter>", lambda e: btn_acceder.config(bg=rojo_hover))
+    btn_acceder.bind("<Leave>", lambda e: btn_acceder.config(bg=rojo))
+
+    #======== ICONO AJUSTES (ESQUINA INFERIOR DERECHA) ========#
+    icono_ajustes = tk.Button(root, text="⚙️", font=("Arial", 12), bg=blanco,
+                              fg=gris_oscuro, bd=0, activeforeground=azul_oscuro,
+                              activebackground=blanco, command=abrir_menu_ajustes,
+                              cursor="hand2")
+    icono_ajustes.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)
+
+    #======== INICIAR LOOP PRINCIPAL ========#
+    root.mainloop()
+
+    return acceso_concedido
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#======== VENTANA: CAMBIO DE CONTRASEÑA EN AJUSTES ====================================================================================#
+    
+# Añade esto AL INICIO de tu archivo bloqueo_de_pantalla.py (antes de cualquier función)
+clave_correcta = "deeptrade2025"  # Variable global inicial
+
+# Al inicio de tu archivo bloqueo_de_pantalla.py
+clave_correcta = "deeptrade2025"  # Variable global
+blanco = "#ffffff"
+gris_claro = "#f0f0f0"
+negro = "#000000"
+verde = "#28a745"
+gris_medio = "#cccccc"
+
+
+# Al inicio del archivo, fuera de cualquier función
+clave_correcta = "deeptrade2025"  # Valor por defecto
+
+# Al inicio del archivo, fuera de cualquier función
+clave_correcta = "deeptrade2025"  # Valor por defecto
+
+# Colores definidos (asegúrate de poner esto antes de llamar la función)
+blanco = "#FFFFFF"
+negro = "#000000"
+gris_claro = "#F0F0F0"
+gris_medio = "#A0A0A0"
+gris_oscuro = "#606060"
+verde = "#4CAF50"
+verde_oscuro = "#388E3C"
+
+# Variable global para la clave actual
+clave_correcta = "deeptrade2025"  # Valor por defecto
+
+def abrir_cambio_clave(root):  
+    global clave_correcta  # Asegura que modificamos la global
+
+    # === Cargar la clave actual desde archivo ===
+    try:
+        with open('configuracion_clave.dat', 'rb') as f:
+            import pickle
+            clave_correcta = pickle.load(f)
+    except Exception:
+        pass
+
+    # Configuración de ventana
+    ventana_cambio = tk.Toplevel(root)
+    ventana_cambio.title("Cambio de Contraseña")
+    ventana_cambio.geometry("350x300")  # Aumenté la altura de la ventana
+    ventana_cambio.resizable(False, False)
+    ventana_cambio.configure(bg=blanco)
+    ventana_cambio.geometry(f"+{root.winfo_x()+50}+{root.winfo_y()+50}")
+
+    # Hacer que la ventana sea modal
+    ventana_cambio.grab_set()
+    ventana_cambio.transient(root)
+    ventana_cambio.focus_force()
+
+    # Contenido principal
+    marco_principal = tk.Frame(ventana_cambio, bg=blanco, padx=20, pady=20)
+    marco_principal.pack(fill='both', expand=True)
+
+    # Función para actualizar la contraseña
+    def actualizar_contraseña(nueva_contraseña):
+        global clave_correcta
+        clave_correcta = nueva_contraseña
+        try:
+            with open('configuracion_clave.dat', 'wb') as f:
+                import pickle
+                pickle.dump(clave_correcta, f)
+        except Exception as e:
+            print(f"Error al guardar: {e}")
+
+    def ejecutar_cambio():
+        global clave_correcta
+
+        actual = entry_actual.get().strip()
+        nueva = entry_nueva.get().strip()
+        confirmacion = entry_confirmar.get().strip()
+
+        if not actual or not nueva or not confirmacion:
+            messagebox.showerror("Error", "Todos los campos son obligatorios", parent=ventana_cambio)
+            return
+
+        if actual != clave_correcta:
+            messagebox.showerror("Error", "La contraseña actual no coincide", parent=ventana_cambio)
+            entry_actual.delete(0, tk.END)
+            entry_actual.focus()
+            return
+
+        if nueva != confirmacion:
+            messagebox.showerror("Error", "La nueva contraseña no coincide con la confirmación", parent=ventana_cambio)
+            entry_nueva.delete(0, tk.END)
+            entry_confirmar.delete(0, tk.END)
+            entry_nueva.focus()
+            return
+
+        if len(nueva) < 8:
+            messagebox.showerror("Error", "La contraseña debe tener al menos 8 caracteres", parent=ventana_cambio)
+            return
+
+        actualizar_contraseña(nueva)
+        messagebox.showinfo("Éxito", "Contraseña actualizada correctamente", parent=ventana_cambio)
+        ventana_cambio.destroy()
+
+    # === Menú contextual para copiar / pegar ===
+    def mostrar_menu_contextual(event):
+        menu = tk.Menu(ventana_cambio, tearoff=0)
+        menu.add_command(label="Copiar", command=lambda: event.widget.event_generate("<<Copy>>"))
+        menu.add_command(label="Pegar", command=lambda: event.widget.event_generate("<<Paste>>"))
+        menu.tk_popup(event.x_root, event.y_root)
+
+    # === Campo: Contraseña actual ===
+    tk.Label(marco_principal, text="Contraseña actual:", 
+             font=("Arial", 10), bg=blanco, fg=negro).grid(row=0, column=0, sticky='w', pady=(0,5))
+
+    entry_actual = tk.Entry(marco_principal, show="*", font=("Arial", 12), width=25,
+                            bg=gris_claro, fg=negro, bd=1, relief="solid")
+    entry_actual.grid(row=1, column=0, sticky='ew')
+    entry_actual.focus()
+    entry_actual.bind("<Button-3>", mostrar_menu_contextual)
+
+    mostrar_actual = tk.BooleanVar(value=False)
+    btn_actual = tk.Button(marco_principal, text="👁", font=("Arial", 10),
+                           bg=blanco, fg=gris_oscuro, bd=0, cursor="hand2",
+                           activebackground=blanco, activeforeground=gris_oscuro,
+                           command=lambda: toggle_password(entry_actual, btn_actual, mostrar_actual))
+    btn_actual.grid(row=1, column=1, padx=(5,0), sticky="w")
+
+    # === Campo: Nueva contraseña ===
+    tk.Label(marco_principal, text="Nueva contraseña:", 
+             font=("Arial", 10), bg=blanco, fg=negro).grid(row=2, column=0, sticky='w', pady=(15,5))
+
+    entry_nueva = tk.Entry(marco_principal, show="*", font=("Arial", 12), width=25,
+                           bg=gris_claro, fg=negro, bd=1, relief="solid")
+    entry_nueva.grid(row=3, column=0, sticky='ew')
+    entry_nueva.bind("<Button-3>", mostrar_menu_contextual)
+
+    mostrar_nueva = tk.BooleanVar(value=False)
+    btn_nueva = tk.Button(marco_principal, text="👁", font=("Arial", 10),
+                          bg=blanco, fg=gris_oscuro, bd=0, cursor="hand2",
+                          activebackground=blanco, activeforeground=gris_oscuro,
+                          command=lambda: toggle_password(entry_nueva, btn_nueva, mostrar_nueva))
+    btn_nueva.grid(row=3, column=1, padx=(5,0), sticky="w")
+
+    # === Campo: Confirmar contraseña ===
+    tk.Label(marco_principal, text="Confirmar nueva contraseña:", 
+             font=("Arial", 10), bg=blanco, fg=negro).grid(row=4, column=0, sticky='w', pady=(15,5))
+
+    entry_confirmar = tk.Entry(marco_principal, show="*", font=("Arial", 12), width=25,
+                               bg=gris_claro, fg=negro, bd=1, relief="solid")
+    entry_confirmar.grid(row=5, column=0, sticky='ew')
+    entry_confirmar.bind("<Button-3>", mostrar_menu_contextual)
+
+    mostrar_confirmar = tk.BooleanVar(value=False)
+    btn_confirmar = tk.Button(marco_principal, text="👁", font=("Arial", 10),
+                              bg=blanco, fg=gris_oscuro, bd=0, cursor="hand2",
+                              activebackground=blanco, activeforeground=gris_oscuro,
+                              command=lambda: toggle_password(entry_confirmar, btn_confirmar, mostrar_confirmar))
+    btn_confirmar.grid(row=5, column=1, padx=(5,0), sticky="w")
+
+    # === Botones ===
+    frame_botones = tk.Frame(marco_principal, bg=blanco)
+    frame_botones.grid(row=6, column=0, columnspan=2, sticky='w', pady=(30, 10))  # Justificado a la izquierda con espacio abajo
+
+    btn_cancelar = tk.Button(frame_botones, text="Cancelar", width=10,
+                             command=ventana_cambio.destroy,
+                             font=("Arial", 10), bg=gris_medio, fg=blanco,
+                             activebackground=gris_oscuro, activeforeground=blanco,
+                             relief="flat", cursor="hand2")
+    btn_cancelar.pack(side='left', padx=5)
+    btn_cancelar.bind("<Enter>", lambda e: btn_cancelar.config(bg=gris_oscuro))
+    btn_cancelar.bind("<Leave>", lambda e: btn_cancelar.config(bg=gris_medio))
+
+    btn_guardar = tk.Button(frame_botones, text="Guardar", width=10,
+                            command=ejecutar_cambio,
+                            font=("Arial", 10, "bold"), bg=verde, fg=blanco,
+                            activebackground=verde_oscuro, activeforeground=blanco,
+                            relief="flat", cursor="hand2")
+    btn_guardar.pack(side='left')
+    btn_guardar.bind("<Enter>", lambda e: btn_guardar.config(bg=verde_oscuro))
+    btn_guardar.bind("<Leave>", lambda e: btn_guardar.config(bg=verde))
+
+    ventana_cambio.bind('<Return>', lambda e: ejecutar_cambio())
+
+    # === Función auxiliar: mostrar/ocultar ===
+    def toggle_password(entry, button, var):
+        if var.get():
+            entry.config(show="*")
+            button.config(text="👁")
+            var.set(False)
+        else:
+            entry.config(show="")
+            button.config(text="👁")
+            var.set(True)
